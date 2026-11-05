@@ -94,6 +94,104 @@ header.top h1 span { color: var(--accent); }
 @media (max-width: 980px) { .presets { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 560px) { .prebtns { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
+/* tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-top: -8px; overflow-x: auto; }
+.tabs button {
+  font: 700 17px/1 var(--f-display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  background: none; border: 0; border-bottom: 3px solid transparent; padding: 12px 14px 10px; cursor: pointer; white-space: nowrap;
+}
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.tabs .count { font: 500 12px var(--f-mono); background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px; margin-left: 4px; vertical-align: 2px; color: var(--ink); }
+.view { display: grid; gap: 20px; }
+@media (max-width: 460px) { .tabs button { font-size: 15px; padding: 11px 9px 9px; letter-spacing: .05em; } }
+
+/* fleet */
+.fleet { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.hangar { padding: 16px 16px 10px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+.hangar h2, .fdetail h2 { font-size: 22px; text-transform: uppercase; letter-spacing: .05em; }
+.addrow { display: flex; gap: 6px; margin-top: 10px; }
+.addrow input { flex: 1; min-width: 0; font: 500 15px var(--f-body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+.addrow input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.addrow .btn.go { padding: 0 12px; font-size: 14px; }
+.addmsg { font-size: 13px; color: var(--muted); margin: 6px 0 0; min-height: 1.2em; }
+.addmsg.err { color: var(--bad); }
+.fleetsum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 8px 0 10px; }
+.fleetsum div { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; min-width: 0; }
+.fleetsum b { display: block; font: 500 16px var(--f-mono); font-variant-numeric: tabular-nums; }
+.fleetsum span { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.flist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 60vh; overflow-y: auto; }
+.flist button {
+  width: 100%; text-align: left; background: var(--panel); color: var(--ink); border: 1.5px solid var(--line); border-radius: 6px;
+  padding: 8px 10px; cursor: pointer; display: grid; gap: 2px;
+}
+.flist button:hover { border-color: var(--muted); }
+.flist button[aria-current="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.flist button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.flist .fn { font: 700 17px/1.1 var(--f-display); letter-spacing: .02em; overflow-wrap: anywhere; }
+.flist .fs { font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+.flist .fk { font: 400 12px var(--f-mono); color: var(--ink); display: flex; gap: 10px; flex-wrap: wrap; }
+.emptyfleet { color: var(--muted); font-size: 14px; padding: 6px 2px 10px; }
+.fdetail { padding: 18px 20px 20px; min-width: 0; }
+.fhead { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; border-bottom: 2px solid var(--ink); padding-bottom: 12px; }
+.fhead .ftitle { min-width: 0; }
+.fhead .ftitle h2 { font-size: 30px; line-height: 1.05; text-transform: none; letter-spacing: .01em; overflow-wrap: anywhere; }
+.fhead .ftitle p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; margin-top: 14px; }
+.field label { display: block; font: 600 12px var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.field input, .field textarea { width: 100%; font: 500 15px var(--f-body); color: var(--ink); background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 7px 9px; }
+.field textarea { resize: vertical; min-height: 38px; }
+.field input:focus-visible, .field textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.field.wide { grid-column: 1 / -1; }
+.factions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.btn.ghost { font: 600 13.5px var(--f-body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 7px 10px; cursor: pointer; }
+.btn.ghost:hover { border-color: var(--accent); }
+.btn.ghost.danger { color: var(--bad); }
+.btn.ghost:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.fsec { margin-top: 18px; }
+.fsec h3 { font: 600 14px var(--f-display); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.dials { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.dial { padding: 10px 12px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); min-width: 0; background: var(--panel); }
+.dial .k { font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.dial .v { font: 500 21px/1.2 var(--f-mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.dial .v small { font-size: 12px; color: var(--muted); margin-left: 2px; }
+.dial .d { font: 400 11.5px var(--f-mono); color: var(--muted); }
+.dial .d.up { color: var(--good); } .dial .d.down { color: var(--bad); }
+.dmgbar { display: flex; height: 12px; border-radius: 2px; overflow: hidden; border: 1px solid var(--line); background: var(--panel-2); }
+.dmgbar span { display: block; height: 100%; }
+.dmgkey { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; margin-top: 6px; }
+.dmgkey i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.c-Energy { background: var(--energy); } .c-Ballistic { background: var(--ballistic); } .c-Distortion { background: var(--distortion); } .c-Thermal { background: var(--bad); }
+.qtime { display: flex; gap: 8px; flex-wrap: wrap; }
+.qtime div { background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 6px 9px; font-size: 13px; }
+.qtime b { font: 500 14px var(--f-mono); }
+.fslots { display: grid; gap: 0; }
+.fslot { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 4px 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.fslot:last-child { border-bottom: 0; }
+.fslot select { width: 100%; min-width: 0; font: 500 14.5px var(--f-body); color: var(--ink); background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 6px 7px; }
+.fslot.changed select { border-color: var(--accent); background: var(--accent-soft); }
+.fslot select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.fslot .slot-label { display: block; margin-bottom: 3px; }
+.fslot .slot-info { margin-top: 3px; }
+.saverow { display: flex; align-items: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.saverow .btn.go { padding: 9px 14px; font-size: 15px; }
+.savemsg { font-size: 13px; color: var(--good); }
+.askwide { max-width: 900px; width: 100%; justify-self: center; }
+.gsub { color: var(--muted); margin: 4px 0 0; font-size: 14px; }
+.thread.tall { max-height: 60vh; }
+@media (max-width: 980px) {
+  .fleet { grid-template-columns: minmax(0, 1fr); }
+  .hangar { position: static; }
+  .flist { max-height: none; }
+}
+@media (max-width: 640px) {
+  .dials { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fields { grid-template-columns: minmax(0, 1fr); }
+  .fdetail { padding: 14px 12px; }
+  .fhead .ftitle h2 { font-size: 24px; }
+}
+
 /* profile + ask */
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .eyebrow { display: block; font: 600 12px var(--f-display); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
@@ -255,6 +353,13 @@ footer.notes a { color: inherit; }
     <div class="patch"><span>Game data <b id="ver">—</b></span><span>Prices <b id="priced">—</b></span><button class="linkbtn" id="refresh" type="button">Refresh data</button></div>
   </header>
 
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" id="tab-planner" data-view="planner" aria-controls="view-planner">Planner</button>
+    <button role="tab" id="tab-fleet" data-view="fleet" aria-controls="view-fleet">Your Fleet <span class="count" id="fleetcount">0</span></button>
+    <button role="tab" id="tab-ask" data-view="ask" aria-controls="view-ask">Ask</button>
+  </nav>
+
+  <div class="view" id="view-planner" role="tabpanel" aria-labelledby="tab-planner">
   <section class="presets" aria-label="Quick loadouts">
     <form class="cmd" id="cmdform">
       <label for="cmd">Ask for a loadout</label>
@@ -336,22 +441,22 @@ footer.notes a { color: inherit; }
         </div>
       </div>
     </section>
-    <section class="panel ask" aria-labelledby="ask-h">
+    <section class="panel ask" id="chat-ship" aria-labelledby="ask-h">
       <span class="eyebrow">Ask Gemini</span>
       <h2 id="ask-h">Questions about the <span id="ask-ship">ship</span></h2>
-      <div class="chips" id="ask-chips"></div>
-      <div class="thread" id="thread" aria-live="polite"></div>
-      <form class="askrow" id="askform">
+      <div class="chips"></div>
+      <div class="thread" aria-live="polite"></div>
+      <form class="askrow">
         <label for="askq" class="sr">Your question</label>
         <input id="askq" autocomplete="off" placeholder="Is this ship good for bounty hunting?">
-        <button class="btn go" id="askbtn" type="submit">Ask</button>
+        <button class="btn go" type="submit">Ask</button>
       </form>
       <div class="modelrow">
         <label for="model">Model</label>
-        <select id="model"><option value="auto">Auto (first available)</option></select>
-        <span class="switched" id="switched" role="status" aria-live="polite"></span>
+        <select id="model" class="model"><option value="auto">Auto (first available)</option></select>
+        <span class="switched" role="status" aria-live="polite"></span>
       </div>
-      <p class="askhint" id="askhint">Answers use this ship's game data and your current loadout.</p>
+      <p class="askhint">Answers use this ship's game data and your current loadout.</p>
     </section>
   </div>
 
@@ -362,6 +467,10 @@ footer.notes a { color: inherit; }
         <h2>Readout</h2>
         <div class="stats" id="stats"></div>
         <div class="costline"><span class="k">Cost of upgrades (cheapest stores)</span><span class="v num" id="cost">0</span></div>
+        <div class="saverow">
+          <button class="btn go" id="savefleet" type="button">Save to my fleet</button>
+          <span class="savemsg" id="savemsg" role="status" aria-live="polite"></span>
+        </div>
       </section>
       <section class="panel route" aria-label="Where to buy">
         <h2>Where to buy</h2>
@@ -370,6 +479,47 @@ footer.notes a { color: inherit; }
         <div id="nostock"></div>
       </section>
     </aside>
+  </div>
+  </div><!-- /view-planner -->
+
+  <div class="view" id="view-fleet" role="tabpanel" aria-labelledby="tab-fleet" hidden>
+    <div class="fleet">
+      <aside class="panel hangar">
+        <h2>Hangar</h2>
+        <form class="addrow" id="addform">
+          <label for="addship" class="sr">Add a ship</label>
+          <input id="addship" list="shiplist" autocomplete="off" spellcheck="false" placeholder="Add a ship you own…">
+          <button class="btn go" type="submit">Add</button>
+        </form>
+        <p class="addmsg" id="addmsg" role="status" aria-live="polite"></p>
+        <div class="fleetsum" id="fleetsum"></div>
+        <ul class="flist" id="flist"></ul>
+      </aside>
+      <section class="panel fdetail" id="fdetail" aria-live="polite"></section>
+    </div>
+    <datalist id="liverylist"></datalist>
+  </div>
+
+  <div class="view" id="view-ask" role="tabpanel" aria-labelledby="tab-ask" hidden>
+    <section class="panel ask askwide" id="chat-general" aria-labelledby="gask-h">
+      <span class="eyebrow">Ask Gemini</span>
+      <h2 id="gask-h">Ask about any ship</h2>
+      <p class="gsub" id="gsub">Answers know every ship's stats and your fleet with its current parts.</p>
+      <div class="chips"></div>
+      <div class="thread tall" aria-live="polite"></div>
+      <form class="askrow">
+        <label for="gaskq" class="sr">Your question</label>
+        <input id="gaskq" autocomplete="off" placeholder="Which of my ships is best for bounty hunting in Pyro?">
+        <button class="btn go" type="submit">Ask</button>
+      </form>
+      <div class="modelrow">
+        <label for="gmodel">Model</label>
+        <select id="gmodel" class="model"><option value="auto">Auto (first available)</option></select>
+        <span class="switched" role="status" aria-live="polite"></span>
+        <button class="linkbtn" type="button" data-clear>Clear conversation</button>
+      </div>
+      <p class="askhint">Ships named in your question get their full stats sent along.</p>
+    </section>
   </div>
 
   <footer class="notes">
@@ -426,7 +576,9 @@ footer.notes a { color: inherit; }
   try { const saved = JSON.parse(localStorage.getItem('hp-prefs') || 'null'); if (saved) prefs = Object.assign(prefs, saved); } catch (e) {}
   const save = () => { try { localStorage.setItem('hp-prefs', JSON.stringify(prefs)); } catch (e) {} };
 
-  let ship = null, picks = [], manual = {};
+  let ship = null, picks = [], manual = {}, plannerFleetId = null, view = 'planner';
+  const setHash = h => { try { if (location.hash !== h) history.replaceState(null, '', h); } catch (e) {} };
+  const MAKERS_RX = /^(Aegis|Anvil|Drake|Origin|RSI|MISC|Crusader|Mirai|Esperia|Kruger|Argo|ARGO|Gatac|Aopoa|Banu|C\.O\.|Consolidated Outland|Grey's|Tumbril|Greycat|Vanduul) /;
   const fmt = n => Math.round(n).toLocaleString('en-US');
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const slug = cn => cn.toLowerCase().replace(/[^a-z0-9]+/g, '-');
@@ -485,15 +637,18 @@ footer.notes a { color: inherit; }
   }
 
   // ---------- stats ----------
-  function stats(list) {
-    const t = { pb: 0, ps: 0, pa: 0, cb: 0, hp: 0, rg: 0, pw: 0, cl: 0, qd: 0 };
-    ship.slots.forEach((sl, i) => {
+  function stats(list, s = ship) {
+    const t = { pb: 0, ps: 0, pa: 0, cb: 0, hp: 0, rg: 0, pw: 0, cl: 0, qd: 0, spool: 0, qcd: 0, dmg: {} };
+    s.slots.forEach((sl, i) => {
       const it = I[list[i]]; if (!it) return;
-      if (sl.cat === 'gun') { if (sl.crew) t.cb += it.b; else { t.pb += it.b; t.ps += it.su; t.pa += it.a; } }
+      if (sl.cat === 'gun') {
+        if (sl.crew) t.cb += it.b; else { t.pb += it.b; t.ps += it.su; t.pa += it.a; }
+        t.dmg[it.dt] = (t.dmg[it.dt] || 0) + it.b;
+      }
       else if (sl.cat === 'shield') { t.hp += it.hp; t.rg += it.rg; }
       else if (sl.cat === 'power') t.pw += it.out;
       else if (sl.cat === 'cooler') t.cl += it.out;
-      else if (sl.cat === 'qd') t.qd = Math.max(t.qd, it.sp);
+      else if (sl.cat === 'qd' && it.sp > t.qd) { t.qd = it.sp; t.spool = it.spool; t.qcd = it.cd; }
     });
     return t;
   }
@@ -631,12 +786,13 @@ footer.notes a { color: inherit; }
   }
   function setShip(s, keepManual) {
     ship = s; if (!keepManual) manual = {};
+    plannerFleetId = null;
     document.getElementById('ship').value = s.n;
     const guns = s.slots.filter(x => x.cat === 'gun').length;
     document.getElementById('shipmeta').innerHTML = `<b>${esc(s.m)}</b> · ${esc(s.car)} · ${esc(s.role)} · ${guns} gun hardpoint${guns === 1 ? '' : 's'}`;
-    try { if (location.hash !== '#' + slug(s.cn)) history.replaceState(null, '', '#' + slug(s.cn)); } catch (e) {}
+    if (view === 'planner') setHash('#' + slug(s.cn));
     recompute();
-    renderProfile(); resetThread();
+    renderProfile(); resetThread(); syncSaveBtn();
   }
   function syncControls() {
     document.querySelectorAll('.seg').forEach(seg => seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(prefs[seg.dataset.key] === b.dataset.v))));
@@ -760,72 +916,42 @@ footer.notes a { color: inherit; }
     const p = e.currentTarget.dataset.p; if (p && activePreset() !== p) applyPreset(p);
   });
 
-  // ---------- ask Gemini (through this server) ----------
-  let thread = [], ctl = null;
-  const modelSel = document.getElementById('model'), switchedEl = document.getElementById('switched');
+  // ---------- Gemini model list (shared by every question box) ----------
   let modelList = [];
   const STATUS_TXT = { daily: 'daily limit reached', busy: 'busy', unavailable: 'not available' };
   const untilTxt = iso => { try { return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); } catch (e) { return ''; } };
   function savedModel() { try { return localStorage.getItem('hp-model') || 'auto'; } catch (e) { return 'auto'; } }
   function saveModel(v) { try { localStorage.setItem('hp-model', v); } catch (e) {} }
+  const modelSels = [...document.querySelectorAll('select.model')];
+  const setModelAll = v => modelSels.forEach(s => { s.value = modelList.some(m => m.id === v) ? v : 'auto'; });
   function renderModels(list, keep) {
     modelList = list || [];
-    const want = keep || modelSel.value || savedModel();
+    const want = keep || savedModel();
     const firstOk = modelList.find(m => m.status === 'ok');
-    modelSel.innerHTML = '<option value="auto">Auto (first available)</option>' + modelList.map(m => {
+    const html = '<option value="auto">Auto (first available)</option>' + modelList.map(m => {
       const extra = m.status === 'ok' ? '' : ` (${STATUS_TXT[m.status] || m.status}${m.until ? ' until ' + untilTxt(m.until) : ''})`;
-      return `<option value="${esc(m.id)}"${m.status !== 'ok' ? ' class="off"' : ''}>${esc(m.label)}${esc(extra)}</option>`;
+      return `<option value="${esc(m.id)}">${esc(m.label)}${esc(extra)}</option>`;
     }).join('');
+    modelSels.forEach(s => { s.innerHTML = html; });
     let pick = want;
     const chosen = modelList.find(m => m.id === want);
     if (want !== 'auto' && (!chosen || chosen.status !== 'ok')) {
       // the chosen model is full or gone: switch to the first available one
       pick = firstOk ? firstOk.id : 'auto';
-      if (chosen && firstOk) switchedEl.textContent = `${chosen.label} is at its limit. Switched to ${firstOk.label}.`;
+      if (chosen && firstOk) chats.forEach(c => c.note(`${chosen.label} is at its limit. Switched to ${firstOk.label}.`));
     }
-    modelSel.value = modelList.some(m => m.id === pick) ? pick : 'auto';
+    setModelAll(pick);
   }
   async function loadModels() {
     try {
       const r = await fetch('api/models', { cache: 'no-store' }); const j = await r.json();
       if (!j.enabled) { aiOff(); return; }
-      renderModels(j.models, modelList.length ? modelSel.value : savedModel());
-    } catch (e) { /* keep the dropdown as is */ }
+      renderModels(j.models, modelList.length ? modelSels[0].value : savedModel());
+    } catch (e) { /* keep the dropdowns as they are */ }
   }
-  function aiOff() {
-    document.getElementById('askform').hidden = true; document.getElementById('ask-chips').hidden = true;
-    modelSel.closest('.modelrow').hidden = true;
-    askhint.textContent = 'Questions are off. Add GEMINI_API_KEY in the container settings and restart it to turn them on.';
-  }
-  modelSel.addEventListener('change', () => { saveModel(modelSel.value); switchedEl.textContent = ''; });
-  const threadEl = document.getElementById('thread'), askq = document.getElementById('askq'), askbtn = document.getElementById('askbtn'), askhint = document.getElementById('askhint');
-  function shipBrief(s, withPicks) {
-    const st = s.st, pr = profileOf(s);
-    const lines = [
-      `${s.n} (${s.m}) · career ${s.car} · role ${s.role} · ship size ${s.sz} · crew ${st.crew}`,
-      `Flight: pitch ${st.pitch}°/s, yaw ${st.yaw}°/s, roll ${st.roll}°/s, main accel ${st.acc} m/s², SCM ${st.scm} m/s, boost ${st.boost} m/s, mass ${fmt(st.mass)} kg`,
-      `Durability: hull ${fmt(st.hull)}, armor ${fmt(st.armor)}, stock shields ${fmt(st.shield)} HP. Largest cross-section ${fmt(st.cs)}. EM ${fmt(st.em)}, IR ${fmt(st.ir)}. Cargo ${st.cargo} SCU.`,
-      `Power: ${st.gen} generation segments; weapon pips ${st.wpip} for ${pilotGuns(s).length} pilot guns. Quantum spool ${st.qspool}s.`,
-      `Percentile vs same-size ships: agility ${pr.P.agility}, toughness ${pr.P.tough}, speed ${pr.P.speed}, stock pilot firepower ${pr.P.fire}, stealth ${pr.P.stealth}. Profile verdict: ${pr.use}.`,
-      'Hardpoints (slot · size · stock part' + (withPicks ? ' → current pick' : '') + '):',
-    ];
-    s.slots.forEach((sl, i) => {
-      const stock = I[sl.st] ? I[sl.st].n : 'empty';
-      const pick = withPicks && picks[i] && picks[i] !== sl.st ? ` → ${I[picks[i]].n}` : '';
-      lines.push(`- ${sl.cat}${sl.crew ? ' (crew turret)' : ''} ${sl.grp} S${sl.s}${sl.ed ? '' : ' locked'}: ${stock}${pick}`);
-    });
-    return lines.join('\n');
-  }
-  function context(question) {
-    const other = findShip(question);
-    let ctx = `Patch ${D.ver} game data.\n\nSHIP IN APP:\n${shipBrief(ship, true)}`;
-    const p = activePreset();
-    ctx += `\n\nApp settings: preset ${p ? PRESETS[p].name : 'custom'}; weapon priority ${prefs.wp}; damage ${prefs.dt}; shields ${prefs.sh}; component class ${prefs.cls}; quantum ${prefs.qd}; shopping in ${prefs.sys}.`;
-    const t = stats(picks), a = stats(ship.slots.map(x => x.st));
-    ctx += `\nCurrent loadout totals (stock in brackets): pilot burst ${fmt(t.pb)} [${fmt(a.pb)}], sustained ${fmt(t.ps)} [${fmt(a.ps)}], shield HP ${fmt(t.hp)} [${fmt(a.hp)}], regen ${fmt(t.rg)}/s [${fmt(a.rg)}].`;
-    if (other && other !== ship) ctx += `\n\nOTHER SHIP MENTIONED:\n${shipBrief(other, false)}`;
-    return ctx;
-  }
+  function aiOff() { chats.forEach(c => c.off()); }
+  modelSels.forEach(s => s.addEventListener('change', () => { saveModel(s.value); setModelAll(s.value); chats.forEach(c => c.note('')); }));
+
   function md(t) {
     const out = []; let list = [];
     const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
@@ -838,83 +964,189 @@ footer.notes a { color: inherit; }
     if (list.length) out.push(`<ul>${list.join('')}</ul>`);
     return out.join('');
   }
+
+  // ---------- question box component ----------
+  const chats = [];
+  function makeChat(root, opts) {
+    const chipsEl = root.querySelector('.chips'), threadEl = root.querySelector('.thread');
+    const form = root.querySelector('form.askrow'), input = form.querySelector('input'), btn = form.querySelector('button');
+    const sel = root.querySelector('select.model'), sw = root.querySelector('.switched'), hint = root.querySelector('.askhint');
+    let thread = [], ctl = null;
+    const setBusy = on => { btn.textContent = on ? 'Stop' : 'Ask'; btn.classList.toggle('stop', on); };
+    async function ask(q) {
+      q = q.trim(); if (!q || ctl) return;
+      const qEl = document.createElement('div'); qEl.className = 'q'; qEl.textContent = q;
+      const aEl = document.createElement('div'); aEl.className = 'a wait'; aEl.textContent = opts.waitText || 'Checking the ship data…';
+      threadEl.append(qEl, aEl); threadEl.scrollTop = threadEl.scrollHeight;
+      input.value = ''; sw.textContent = '';
+      const requested = sel.value;
+      ctl = new AbortController(); setBusy(true);
+      let text = '', truncated = false, failed = null;
+      try {
+        const res = await fetch('api/ask', {
+          method: 'POST', signal: ctl.signal, headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: q, context: opts.context(q), history: thread.slice(-2), model: requested, mode: opts.mode }),
+        });
+        if (!res.ok || !res.body) {
+          let j = {}; try { j = await res.json(); } catch (e) {}
+          throw { code: j.code || 'http_' + res.status, message: j.message || `The server answered ${res.status}.` };
+        }
+        const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = '';
+        for (;;) {
+          const { value, done } = await reader.read(); if (done) break;
+          buf += dec.decode(value, { stream: true });
+          let i;
+          while ((i = buf.indexOf('\n')) >= 0) {
+            const line = buf.slice(0, i); buf = buf.slice(i + 1);
+            if (!line.trim()) continue;
+            let ev; try { ev = JSON.parse(line); } catch (e) { continue; }
+            if (ev.type === 'model') {
+              if (requested !== 'auto' && ev.model !== requested) {
+                const was = (modelList.find(m => m.id === requested) || { label: requested }).label;
+                sw.textContent = `${was} is at its limit. Switched to ${ev.label}.`;
+                setModelAll(ev.model); // auto-select the model that's available
+              } else if (requested === 'auto') {
+                sw.textContent = `Answered by ${ev.label}${ev.switchedFrom && ev.switchedFrom.length ? ` (${ev.switchedFrom.length} busier model${ev.switchedFrom.length > 1 ? 's' : ''} skipped)` : ''}.`;
+              }
+            } else if (ev.type === 'text') {
+              text += ev.text; aEl.className = 'a'; aEl.innerHTML = md(text); threadEl.scrollTop = threadEl.scrollHeight;
+            } else if (ev.type === 'done') truncated = !!ev.truncated;
+            else if (ev.type === 'error') failed = ev;
+            else if (ev.type === 'models') renderModels(ev.models, sel.value);
+          }
+        }
+        if (failed) throw failed;
+        aEl.className = 'a'; aEl.innerHTML = md(text) + (truncated ? '<p><i>The answer was cut short. Ask a narrower question for the rest.</i></p>' : '');
+        thread.push({ q, a: text });
+      } catch (e) {
+        if (e && e.name === 'AbortError') { if (text) { aEl.className = 'a'; aEl.innerHTML = md(text) + '<p><i>Stopped.</i></p>'; } else aEl.remove(); }
+        else if (e && e.code === 'no_key') { aEl.remove(); qEl.remove(); aiOff(); }
+        else { aEl.className = 'a err'; aEl.innerHTML = (text ? md(text) : '') + `<p>${esc((e && e.message) || 'The answer was interrupted. Ask again to retry.')}</p>`; loadModels(); }
+      } finally { ctl = null; setBusy(false); }
+    }
+    form.addEventListener('submit', e => { e.preventDefault(); if (ctl) { ctl.abort(); return; } ask(input.value); });
+    chipsEl.addEventListener('click', e => { const b = e.target.closest('button'); if (b && !ctl) ask(b.textContent); });
+    const clear = root.querySelector('[data-clear]');
+    const api = {
+      ask,
+      busy: () => !!ctl,
+      reset() { if (ctl) ctl.abort(); thread = []; threadEl.innerHTML = ''; sw.textContent = ''; },
+      setChips(qs) { chipsEl.innerHTML = qs.map(q => `<button type="button">${esc(q)}</button>`).join(''); },
+      note(t) { sw.textContent = t; },
+      prefill(t) { input.value = t; input.focus(); },
+      off() {
+        form.hidden = true; chipsEl.hidden = true; sw.closest('.modelrow').hidden = true;
+        hint.textContent = 'Questions are off. Add GEMINI_API_KEY in the container settings and restart it to turn them on.';
+      },
+    };
+    if (clear) clear.addEventListener('click', () => api.reset());
+    chats.push(api);
+    return api;
+  }
+
+  // ---------- what each question box sends ----------
+  function shipBrief(s, slotPicks) {
+    const st = s.st, pr = profileOf(s);
+    const lines = [
+      `${s.n} (${s.m}) · career ${s.car} · role ${s.role} · ship size ${s.sz} · crew ${st.crew}`,
+      `Flight: pitch ${st.pitch}°/s, yaw ${st.yaw}°/s, roll ${st.roll}°/s, main accel ${st.acc} m/s², SCM ${st.scm} m/s, boost ${st.boost} m/s, mass ${fmt(st.mass)} kg`,
+      `Durability: hull ${fmt(st.hull)}, armor ${fmt(st.armor)}, stock shields ${fmt(st.shield)} HP. Largest cross-section ${fmt(st.cs)}. EM ${fmt(st.em)}, IR ${fmt(st.ir)}. Cargo ${st.cargo} SCU.`,
+      `Power: ${st.gen} generation segments; weapon pips ${st.wpip} for ${pilotGuns(s).length} pilot guns. Quantum spool ${st.qspool}s.`,
+      `Percentile vs same-size ships: agility ${pr.P.agility}, toughness ${pr.P.tough}, speed ${pr.P.speed}, stock pilot firepower ${pr.P.fire}, stealth ${pr.P.stealth}. Profile verdict: ${pr.use}.`,
+      'Hardpoints (slot · size · stock part' + (slotPicks ? ' → fitted part' : '') + '):',
+    ];
+    s.slots.forEach((sl, i) => {
+      const stock = I[sl.st] ? I[sl.st].n : 'empty';
+      const pick = slotPicks && slotPicks[i] && slotPicks[i] !== sl.st && I[slotPicks[i]] ? ` → ${I[slotPicks[i]].n}` : '';
+      lines.push(`- ${sl.cat}${sl.crew ? ' (crew turret)' : ''} ${sl.grp} S${sl.s}${sl.ed ? '' : ' locked'}: ${stock}${pick}`);
+    });
+    if (slotPicks) {
+      const t = stats(slotPicks, s);
+      lines.push(`Fitted totals: pilot burst ${fmt(t.pb)} DPS, sustained ${fmt(t.ps)}, alpha ${fmt(t.pa)}, turret burst ${fmt(t.cb)}, shield HP ${fmt(t.hp)}, regen ${fmt(t.rg)}/s, quantum ${fmt(t.qd)} km/s (spool ${t.spool}s).`);
+    }
+    return lines.join('\n');
+  }
+  function shipContext(question) {
+    const other = findShip(question);
+    let ctx = `Patch ${D.ver} game data.\n\nSHIP IN APP:\n${shipBrief(ship, picks)}`;
+    const p = activePreset();
+    ctx += `\n\nApp settings: preset ${p ? PRESETS[p].name : 'custom'}; weapon priority ${prefs.wp}; damage ${prefs.dt}; shields ${prefs.sh}; component class ${prefs.cls}; quantum ${prefs.qd}; shopping in ${prefs.sys}.`;
+    const a = stats(ship.slots.map(x => x.st));
+    ctx += `\nStock totals for comparison: pilot burst ${fmt(a.pb)}, sustained ${fmt(a.ps)}, shield HP ${fmt(a.hp)}, regen ${fmt(a.rg)}/s.`;
+    const own = fleet.ships.filter(f => f.cn === ship.cn).length;
+    if (own) ctx += `\nThe player owns ${own} of this ship.`;
+    if (other && other !== ship) ctx += `\n\nOTHER SHIP MENTIONED:\n${shipBrief(other, null)}`;
+    return ctx;
+  }
+  let shipTable = null;
+  function allShipsTable() {
+    if (shipTable) return shipTable;
+    const rows = S.map(s => {
+      const st = s.st, a = stats(s.slots.map(x => x.st), s);
+      return `${s.n}|S${s.sz}|${s.car}/${s.role}|crew ${st.crew}|pitch/yaw ${st.pitch}/${st.yaw}|SCM/boost ${st.scm}/${st.boost}|hull+armor ${fmt(st.hull + st.armor)}|shield ${fmt(st.shield)}|pilot burst ${fmt(a.pb)}|turret burst ${fmt(a.cb)}|cargo ${st.cargo}|QD ${fmt(a.qd)} km/s|EM ${fmt(st.em)}`;
+    });
+    shipTable = 'Every flyable ship, stock loadout (name|size|career/role|crew|pitch/yaw °/s|SCM/boost m/s|hull+armor HP|shield HP|pilot burst DPS|turret burst DPS|cargo SCU|quantum speed|EM signature):\n' + rows.join('\n');
+    return shipTable;
+  }
+  function shipsNamedIn(q) {
+    const lq = ' ' + norm(q) + ' ';
+    const hits = [];
+    S.forEach(s => {
+      const model = norm(s.n.replace(MAKERS_RX, ''));
+      if (model.length >= 3 && lq.includes(' ' + model + ' ')) hits.push([s, model.length]);
+    });
+    hits.sort((a, b) => b[1] - a[1]);
+    const out = [];
+    for (const [s] of hits) if (!out.some(o => o.n.includes(s.n) || s.n.includes(o.n)) || out.length === 0) out.push(s);
+    if (!out.length) { const s = findShip(q); if (s) out.push(s); }
+    return out.slice(0, 5);
+  }
+  function generalContext(question) {
+    let ctx = `Patch ${D.ver} game data. Store listings: ${prefs.sys === 'any' ? 'any system' : prefs.sys}.\n\n`;
+    if (fleet.ships.length) {
+      ctx += `THE PLAYER'S FLEET (${fleet.ships.length} ship${fleet.ships.length > 1 ? 's' : ''}):\n`;
+      fleet.ships.forEach((f, i) => {
+        const s = byCn[f.cn]; if (!s) return;
+        ctx += `\n#${i + 1} ${f.name ? `"${f.name}" — ` : ''}${s.n}${f.livery ? ` · livery ${f.livery}` : ''}${f.notes ? ` · notes: ${f.notes}` : ''}\n${shipBrief(s, fleetPicks(f))}\n`;
+      });
+    } else ctx += 'THE PLAYER\'S FLEET: empty (they haven\'t added ships yet).\n';
+    const owned = new Set(fleet.ships.map(f => f.cn));
+    const named = shipsNamedIn(question).filter(s => !owned.has(s.cn));
+    if (named.length) ctx += `\nSHIPS NAMED IN THE QUESTION:\n${named.map(s => shipBrief(s, null)).join('\n\n')}\n`;
+    ctx += `\n${allShipsTable()}`;
+    return ctx;
+  }
+
+  const shipChat = makeChat(document.getElementById('chat-ship'), { mode: 'ship', context: q => shipContext(q) });
+  const generalChat = makeChat(document.getElementById('chat-general'), { mode: 'general', context: q => generalContext(q), waitText: 'Looking over your fleet…' });
+
   function renderChips() {
-    const n = ship.n.replace(/^(Aegis|Anvil|Drake|Origin|RSI|MISC|Crusader|Mirai|Esperia|Kruger|Argo|Gatac|Aopoa|Banu|C\.O\.|Consolidated Outland|Grey's|Tumbril|Greycat) /, '');
+    const n = ship.n.replace(MAKERS_RX, '');
     const qs = [`Is the ${n} good for PvP?`, 'What should I upgrade first?', `What's the ${n} best at?`];
     const rivals = { 2: 'Gladius', 3: 'Cutlass Black', 4: 'Constellation Andromeda' };
     if (rivals[ship.sz] && !ship.n.includes(rivals[ship.sz])) qs.push(`How does it compare to the ${rivals[ship.sz]}?`);
-    document.getElementById('ask-chips').innerHTML = qs.map(q => `<button type="button">${esc(q)}</button>`).join('');
+    shipChat.setChips(qs);
     document.getElementById('ask-ship').textContent = n;
   }
-  document.getElementById('ask-chips').addEventListener('click', e => {
-    const b = e.target.closest('button'); if (!b || ctl) return;
-    ask(b.textContent);
-  });
-  function setBusy(on) {
-    askbtn.textContent = on ? 'Stop' : 'Ask';
-    askbtn.classList.toggle('stop', on);
+  function renderGeneralChips() {
+    if (generalChat.busy()) return;
+    const qs = fleet.ships.length ? [
+      'Which of my ships is best for bounty hunting?',
+      'Which of my ships has the fastest quantum drive?',
+      'Which of my ships is best for cargo hauling?',
+      'What ship should I get next to fill gaps in my fleet?',
+    ] : [
+      'What\'s a good first fighter to buy in game?',
+      'Best ship under size 3 for solo cargo hauling?',
+      'Gladius vs Arrow for PvP?',
+      'Which ships have the fastest quantum drives?',
+    ];
+    generalChat.setChips(qs);
+    document.getElementById('gsub').textContent = fleet.ships.length
+      ? `Answers know every ship's stats and your ${fleet.ships.length}-ship fleet with its current parts.`
+      : 'Answers know every ship\'s stats. Add ships under Your Fleet to get advice about the ones you own.';
   }
-  async function ask(q) {
-    q = q.trim(); if (!q) return;
-    const qEl = document.createElement('div'); qEl.className = 'q'; qEl.textContent = q;
-    const aEl = document.createElement('div'); aEl.className = 'a wait'; aEl.textContent = 'Checking the ship data…';
-    threadEl.append(qEl, aEl); threadEl.scrollTop = threadEl.scrollHeight;
-    askq.value = ''; switchedEl.textContent = '';
-    const requested = modelSel.value;
-    ctl = new AbortController(); setBusy(true);
-    let text = '', truncated = false, used = null, failed = null;
-    try {
-      const res = await fetch('api/ask', {
-        method: 'POST', signal: ctl.signal, headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: q, context: context(q), history: thread.slice(-2), model: requested }),
-      });
-      if (!res.ok || !res.body) {
-        let j = {}; try { j = await res.json(); } catch (e) {}
-        throw { code: j.code || 'http_' + res.status, message: j.message || `The server answered ${res.status}.` };
-      }
-      const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = '';
-      for (;;) {
-        const { value, done } = await reader.read(); if (done) break;
-        buf += dec.decode(value, { stream: true });
-        let i;
-        while ((i = buf.indexOf('\n')) >= 0) {
-          const line = buf.slice(0, i); buf = buf.slice(i + 1);
-          if (!line.trim()) continue;
-          let ev; try { ev = JSON.parse(line); } catch (e) { continue; }
-          if (ev.type === 'model') {
-            used = ev;
-            if (requested !== 'auto' && ev.model !== requested) {
-              const was = (modelList.find(m => m.id === requested) || { label: requested }).label;
-              switchedEl.textContent = `${was} is at its limit. Switched to ${ev.label}.`;
-              modelSel.value = ev.model; // auto-select the model that's available
-            } else if (requested === 'auto') {
-              switchedEl.textContent = `Answered by ${ev.label}${ev.switchedFrom && ev.switchedFrom.length ? ` (${ev.switchedFrom.length} busier model${ev.switchedFrom.length > 1 ? 's' : ''} skipped)` : ''}.`;
-            }
-          } else if (ev.type === 'text') {
-            text += ev.text; aEl.className = 'a'; aEl.innerHTML = md(text); threadEl.scrollTop = threadEl.scrollHeight;
-          } else if (ev.type === 'done') truncated = !!ev.truncated;
-          else if (ev.type === 'error') failed = ev;
-          else if (ev.type === 'models') renderModels(ev.models, modelSel.value);
-        }
-      }
-      if (failed) throw failed;
-      aEl.className = 'a'; aEl.innerHTML = md(text) + (truncated ? '<p><i>The answer was cut short. Ask a narrower question for the rest.</i></p>' : '');
-      thread.push({ q, a: text });
-    } catch (e) {
-      if (e && e.name === 'AbortError') { if (text) { aEl.className = 'a'; aEl.innerHTML = md(text) + '<p><i>Stopped.</i></p>'; } else aEl.remove(); }
-      else if (e && e.code === 'no_key') { aEl.remove(); qEl.remove(); aiOff(); }
-      else { aEl.className = 'a err'; aEl.innerHTML = (text ? md(text) : '') + `<p>${esc((e && e.message) || 'The answer was interrupted. Ask again to retry.')}</p>`; loadModels(); }
-    } finally { ctl = null; setBusy(false); }
-  }
-  document.getElementById('askform').addEventListener('submit', e => {
-    e.preventDefault();
-    if (ctl) { ctl.abort(); return; }
-    ask(askq.value);
-  });
-  function resetThread() {
-    if (ctl) ctl.abort();
-    thread = []; threadEl.innerHTML = ''; renderChips();
-  }
+  function resetThread() { shipChat.reset(); renderChips(); }
 
   // ---------- presets ----------
   const PRESETS = {
@@ -981,14 +1213,286 @@ footer.notes a { color: inherit; }
   }
   document.getElementById('cmdform').addEventListener('submit', e => { e.preventDefault(); runCommand(document.getElementById('cmd').value); });
 
+  // ---------- your fleet ----------
+  const byCn = Object.fromEntries(S.map(s => [s.cn, s]));
+  const LV = D.liveries || [];
+  let fleet = { ships: [] }, fleetSel = null, fleetSaveT = null, fleetServer = false;
+  const uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
+  const fleetPicks = f => { const s = byCn[f.cn]; return s.slots.map((sl, i) => (f.picks && I[f.picks[i]] ? f.picks[i] : sl.st)); };
+  const picksToSave = (s, list) => { const o = {}; s.slots.forEach((sl, i) => { if (list[i] && list[i] !== sl.st) o[i] = list[i]; }); return o; };
+  const shortName = s => s.n.replace(MAKERS_RX, '');
+  const fleetLabel = f => f.name || shortName(byCn[f.cn]);
+
+  async function loadFleet() {
+    try {
+      const r = await fetch('api/fleet', { cache: 'no-store' }); if (!r.ok) throw new Error();
+      fleet = await r.json(); fleetServer = true;
+    } catch (e) {
+      try { fleet = JSON.parse(localStorage.getItem('hp-fleet') || '{"ships":[]}'); } catch (err) { fleet = { ships: [] }; }
+    }
+    fleet.ships = (fleet.ships || []).filter(f => byCn[f.cn]);
+    fleet.ships.forEach(f => { f.picks = f.picks || {}; });
+    if (!fleet.ships.some(f => f.id === fleetSel)) fleetSel = fleet.ships.length ? fleet.ships[0].id : null;
+    renderFleet();
+  }
+  function saveFleet() {
+    clearTimeout(fleetSaveT);
+    fleetSaveT = setTimeout(async () => {
+      try { localStorage.setItem('hp-fleet', JSON.stringify(fleet)); } catch (e) {}
+      if (!fleetServer) return;
+      try {
+        const r = await fetch('api/fleet', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fleet) });
+        if (!r.ok) throw new Error();
+      } catch (e) { setAddMsg('Couldn\'t save to the server. Your changes are kept in this browser for now.', true); }
+    }, 400);
+  }
+  const addMsg = document.getElementById('addmsg');
+  function setAddMsg(t, err) { addMsg.textContent = t; addMsg.className = 'addmsg' + (err ? ' err' : ''); }
+
+  function addToFleet(s, list, name) {
+    const f = { id: uid(), cn: s.cn, name: name || '', livery: '', notes: '', picks: list ? picksToSave(s, list) : {}, added: new Date().toISOString() };
+    fleet.ships.push(f); fleetSel = f.id; saveFleet(); renderFleet();
+    return f;
+  }
+  document.getElementById('addform').addEventListener('submit', e => {
+    e.preventDefault();
+    const inp = document.getElementById('addship'); const v = inp.value.trim(); if (!v) return;
+    const s = S.find(x => x.n.toLowerCase() === v.toLowerCase()) || findShip(v);
+    if (!s) { setAddMsg(`Couldn't find a ship called “${v}”. Pick one from the list as you type.`, true); return; }
+    addToFleet(s); inp.value = '';
+    setAddMsg(`Added the ${s.n}.`);
+  });
+
+  function renderFleet() {
+    renderHangar();
+    renderFleetDetail();
+  }
+  function renderHangar() {
+    document.getElementById('fleetcount').textContent = fleet.ships.length;
+    const list = document.getElementById('flist');
+    const sum = document.getElementById('fleetsum');
+    if (!fleet.ships.length) {
+      sum.innerHTML = '';
+      list.innerHTML = '<li class="emptyfleet">No ships yet. Add the ships you own, or build a loadout in the Planner and tap <b>Save to my fleet</b>.</li>';
+    } else {
+      let cargo = 0, burst = 0, crew = 0;
+      fleet.ships.forEach(f => { const s = byCn[f.cn]; const t = stats(fleetPicks(f), s); cargo += s.st.cargo; burst += t.pb + t.cb; crew += s.st.crew; });
+      sum.innerHTML = `<div><b>${fleet.ships.length}</b><span>Ships</span></div><div><b>${fmt(cargo)}</b><span>Cargo SCU</span></div><div><b>${fmt(burst)}</b><span>Total DPS</span></div>`;
+      list.innerHTML = fleet.ships.map(f => {
+        const s = byCn[f.cn]; const t = stats(fleetPicks(f), s);
+        return `<li><button type="button" data-f="${esc(f.id)}" aria-current="${f.id === fleetSel}">
+          <span class="fn">${esc(fleetLabel(f))}</span>
+          <span class="fs">${f.name ? esc(s.n) : esc(s.m)}${f.livery ? ' · ' + esc(f.livery) : ''}</span>
+          <span class="fk"><span>${fmt(t.pb + t.cb)} DPS</span><span>${fmt(t.hp)} shield</span><span>${fmt(t.qd)} km/s</span></span>
+        </button></li>`;
+      }).join('');
+    }
+    renderGeneralChips();
+  }
+  document.getElementById('flist').addEventListener('click', e => {
+    const b = e.target.closest('button[data-f]'); if (!b) return;
+    fleetSel = b.dataset.f; renderFleet();
+  });
+
+  function dial(k, v, unit, d) { return `<div class="dial"><div class="k">${k}</div><div class="v">${v}${unit ? `<small>${unit}</small>` : ''}</div>${d ? `<div class="d ${d.c || ''}">${d.t}</div>` : '<div class="d">&nbsp;</div>'}</div>`; }
+  function delta(now, stock) {
+    if (!stock) return null;
+    const p = (now - stock) / stock * 100;
+    return Math.abs(p) < 0.5 ? { t: 'stock' } : { t: `${p > 0 ? '+' : ''}${p.toFixed(0)}% vs stock`, c: p > 0 ? 'up' : 'down' };
+  }
+  const durTxt = sec => sec < 90 ? `${Math.round(sec)} s` : sec < 5400 ? `${(sec / 60).toFixed(1)} min` : `${(sec / 3600).toFixed(1)} h`;
+
+  function renderFleetDetail() {
+    const el = document.getElementById('fdetail');
+    const f = fleet.ships.find(x => x.id === fleetSel);
+    if (!f) {
+      el.innerHTML = `<h2>Your fleet</h2><p class="gsub">Add a ship on the left to see its stats, pick its livery, and fit its parts.</p>`;
+      return;
+    }
+    const s = byCn[f.cn], st = s.st, list = fleetPicks(f);
+    const t = stats(list, s), a = stats(s.slots.map(x => x.st), s);
+    // liveries for this ship
+    const lv = (s.lv || []).map(i => LV[i]);
+    document.getElementById('liverylist').innerHTML = (s.lvs !== undefined ? `<option value="${esc(LV[s.lvs])} (stock)">` : '') + lv.map(n => `<option value="${esc(n)}">`).join('');
+    const turretOrPips = pilotGuns(s).length && crewGuns(s).length
+      ? dial('Turret burst DPS', fmt(t.cb), '', delta(t.cb, a.cb))
+      : dial('Weapon power', `${st.wpip}`, ' pips', { t: `${pilotGuns(s).length} pilot gun${pilotGuns(s).length === 1 ? '' : 's'}` });
+    const dials = [
+      dial('Pilot burst DPS', fmt(t.pb), '', delta(t.pb, a.pb)),
+      dial('Sustained DPS', fmt(t.ps), '', delta(t.ps, a.ps)),
+      dial('Alpha per volley', fmt(t.pa), '', delta(t.pa, a.pa)),
+      turretOrPips,
+      dial('Shield HP', fmt(t.hp), '', delta(t.hp, a.hp)),
+      dial('Shield regen', fmt(t.rg), '/s', delta(t.rg, a.rg)),
+      dial('Hull + armor', fmt(st.hull + st.armor), ' HP', { t: `${fmt(st.hull)} hull · ${fmt(st.armor)} armor` }),
+      dial('Quantum speed', fmt(t.qd), ' km/s', delta(t.qd, a.qd)),
+      dial('Power output', fmt(t.pw), '', delta(t.pw, a.pw)),
+      dial('Cooling', fmt(t.cl), '', delta(t.cl, a.cl)),
+      dial('SCM / boost', `${st.scm}/${st.boost}`, ' m/s', { t: `accel ${st.acc} m/s²` }),
+      dial('Pitch / yaw / roll', `${st.pitch}/${st.yaw}/${st.roll}`, '°/s'),
+      dial('Cargo', fmt(st.cargo), ' SCU'),
+      dial('Crew', st.crew, ''),
+      dial('Signature', fmt(st.em), ' EM', { t: `IR ${fmt(st.ir)} · profile ${fmt(st.cs)}` }),
+      dial('Mass', fmt(st.mass / 1000), ' t'),
+    ].join('');
+    const totalDmg = Object.values(t.dmg).reduce((x, y) => x + y, 0);
+    const dmg = totalDmg ? `<div class="dmgbar" role="img" aria-label="Damage mix">${Object.entries(t.dmg).map(([k, v]) => `<span class="c-${esc(k)}" style="width:${(v / totalDmg * 100).toFixed(1)}%"></span>`).join('')}</div>
+      <div class="dmgkey">${Object.entries(t.dmg).sort((x, y) => y[1] - x[1]).map(([k, v]) => `<span><i class="c-${esc(k)}"></i>${esc(k)} <span class="num">${fmt(v)}</span> (${Math.round(v / totalDmg * 100)}%)</span>`).join('')}</div>` : '<p class="gsub">No guns fitted.</p>';
+    const q = t.qd ? `<div class="qtime">
+        <div>Spool-up <b>${t.spool}</b> s</div><div>Cooldown <b>${t.qcd}</b> s</div>
+        <div>10 Gm ≈ <b>${durTxt(t.spool + 1e7 / t.qd)}</b></div><div>50 Gm ≈ <b>${durTxt(t.spool + 5e7 / t.qd)}</b></div>
+      </div><p class="gsub">Travel times are spool-up plus cruising at top speed; real jumps add a few seconds to accelerate.</p>` : '<p class="gsub">No quantum drive.</p>';
+    const slots = s.slots.map((sl, i) => {
+      const cn = list[i];
+      const opts = candidates(sl).sort((x, y) => score(y) - score(x));
+      if (sl.st && !opts.includes(sl.st)) opts.push(sl.st);
+      const mount = sl.cat === 'gun' ? (sl.mt === 'Gimbal' ? 'Gimbal' : sl.mt === 'Turret' ? 'Turret' : 'Fixed') : ({ shield: 'Shield', power: 'Power', cooler: 'Cooler', qd: 'QD' })[sl.cat];
+      return `<div class="fslot${cn !== sl.st ? ' changed' : ''}">
+        <div class="sz">S${sl.s}<small>${mount}</small></div>
+        <div style="min-width:0">
+          <span class="slot-label">${esc(sl.grp)}${sl.crew ? ' · crew turret' : ''}${!sl.ed ? ' · locked' : ''}</span>
+          <select data-fs="${i}" ${sl.ed ? '' : 'disabled'} aria-label="${esc(sl.grp)} size ${sl.s}">
+            ${opts.map(o => `<option value="${esc(o)}"${o === cn ? ' selected' : ''}>${esc(optLabel(o, sl))}</option>`).join('')}
+            ${!cn ? '<option selected value="">Empty</option>' : ''}
+          </select>
+          <div class="slot-info">${cn ? itemStat(cn) : ''}</div>
+        </div>
+      </div>`;
+    }).join('');
+    const changed = Object.keys(f.picks || {}).length;
+    el.innerHTML = `
+      <div class="fhead">
+        <div class="ftitle"><h2>${esc(fleetLabel(f))}</h2><p>${esc(s.n)} · ${esc(s.car)} · ${esc(s.role)} · size ${s.sz}</p></div>
+        <div class="factions">
+          <button class="btn ghost" type="button" data-act="plan">Open in Planner</button>
+          <button class="btn ghost" type="button" data-act="ask">Ask about it</button>
+          <button class="btn ghost danger" type="button" data-act="remove">Remove</button>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="field"><label for="f-name">Nickname</label><input id="f-name" maxlength="60" value="${esc(f.name || '')}" placeholder="${esc(shortName(s))}"></div>
+        <div class="field"><label for="f-livery">Livery</label><input id="f-livery" list="liverylist" maxlength="120" value="${esc(f.livery || '')}" placeholder="${lv.length ? `Pick from ${lv.length} liveries or type one` : 'Type the livery name'}"></div>
+        <div class="field wide"><label for="f-notes">Notes</label><textarea id="f-notes" maxlength="500" rows="1" placeholder="Insurance, where it's parked, what you use it for…">${esc(f.notes || '')}</textarea></div>
+      </div>
+      <div class="fsec"><h3><span>Performance</span><span class="num" style="letter-spacing:0;text-transform:none">with your parts · ${changed ? changed + ' upgraded slot' + (changed > 1 ? 's' : '') : 'all stock'}</span></h3><div class="dials">${dials}</div></div>
+      <div class="fsec"><h3>Damage mix (burst DPS)</h3>${dmg}</div>
+      <div class="fsec"><h3>Quantum travel</h3>${q}</div>
+      <div class="fsec"><h3><span>Parts fitted</span></h3>
+        <div class="factions" style="margin-bottom:6px">
+          <span class="gsub" style="margin:0 4px 0 0">Fill with:</span>
+          ${Object.keys(PRESETS).map(k => `<button class="btn ghost" type="button" data-fill="${k}">${esc(PRESETS[k].name)}</button>`).join('')}
+          <button class="btn ghost" type="button" data-fill="stock">Stock</button>
+        </div>
+        <div class="fslots">${slots}</div>
+      </div>`;
+  }
+
+  const fdetail = document.getElementById('fdetail');
+  fdetail.addEventListener('input', e => {
+    const f = fleet.ships.find(x => x.id === fleetSel); if (!f) return;
+    if (e.target.id === 'f-name') { f.name = e.target.value; document.querySelector('.fhead h2').textContent = fleetLabel(f); }
+    else if (e.target.id === 'f-livery') f.livery = e.target.value.replace(/ \(stock\)$/, '');
+    else if (e.target.id === 'f-notes') f.notes = e.target.value;
+    else return;
+    saveFleet(); renderHangar(); // update the list only, so the field being typed in keeps focus
+  });
+  fdetail.addEventListener('change', e => {
+    const f = fleet.ships.find(x => x.id === fleetSel); if (!f) return;
+    if (['f-name', 'f-livery', 'f-notes'].includes(e.target.id)) {
+      const v = e.target.value;
+      // values are already saved while typing; don't redraw here, or a click on the hangar list mid-blur gets lost
+      const before = JSON.stringify([f.name, f.livery, f.notes]);
+      if (e.target.id === 'f-name') f.name = v;
+      else if (e.target.id === 'f-livery') { f.livery = v.replace(/ \(stock\)$/, ''); e.target.value = f.livery; }
+      else f.notes = v;
+      if (JSON.stringify([f.name, f.livery, f.notes]) !== before) { saveFleet(); setTimeout(renderHangar, 250); }
+      return;
+    }
+    const sel = e.target.closest('select[data-fs]'); if (!sel) return;
+    const i = +sel.dataset.fs, s = byCn[f.cn];
+    if (sel.value && sel.value !== s.slots[i].st) f.picks[i] = sel.value; else delete f.picks[i];
+    saveFleet(); renderFleet();
+    const again = document.querySelector(`select[data-fs="${i}"]`); if (again) again.focus();
+  });
+  fdetail.addEventListener('click', e => {
+    const f = fleet.ships.find(x => x.id === fleetSel); if (!f) return;
+    const s = byCn[f.cn];
+    const fill = e.target.closest('[data-fill]');
+    if (fill) {
+      if (fill.dataset.fill === 'stock') f.picks = {};
+      else {
+        const saved = prefs; prefs = Object.assign({}, prefs, PRESETS[fill.dataset.fill]);
+        try { f.picks = picksToSave(s, s.slots.map(sl => best(sl))); } finally { prefs = saved; }
+      }
+      saveFleet(); renderFleet(); return;
+    }
+    const act = e.target.closest('[data-act]'); if (!act) return;
+    if (act.dataset.act === 'remove') {
+      if (act.dataset.confirm) {
+        fleet.ships = fleet.ships.filter(x => x.id !== f.id);
+        fleetSel = fleet.ships.length ? fleet.ships[0].id : null;
+        setAddMsg(`Removed ${fleetLabel(f)}.`); saveFleet(); renderFleet();
+      } else { act.dataset.confirm = '1'; act.textContent = 'Tap again to remove'; setTimeout(() => { if (act.isConnected) { delete act.dataset.confirm; act.textContent = 'Remove'; } }, 4000); }
+    } else if (act.dataset.act === 'plan') {
+      showView('planner');
+      setShip(s);
+      const list = fleetPicks(f); manual = {};
+      s.slots.forEach((sl, i) => { if (list[i] !== sl.st) manual[i] = list[i]; });
+      plannerFleetId = f.id; recompute(); syncSaveBtn();
+      document.getElementById('savemsg').textContent = `Showing your ${fleetLabel(f)}. Changes here aren't saved until you tap Update.`;
+    } else if (act.dataset.act === 'ask') {
+      showView('ask');
+      generalChat.prefill(`What's my ${fleetLabel(f)} best for with its current parts, and what should I upgrade?`);
+    }
+  });
+
+  // planner → fleet
+  const saveBtn = document.getElementById('savefleet'), saveMsg = document.getElementById('savemsg');
+  function syncSaveBtn() {
+    const f = plannerFleetId && fleet.ships.find(x => x.id === plannerFleetId && x.cn === ship.cn);
+    saveBtn.textContent = f ? `Update “${fleetLabel(f)}” in my fleet` : 'Save to my fleet';
+    if (!f) saveMsg.textContent = '';
+  }
+  saveBtn.addEventListener('click', () => {
+    const f = plannerFleetId && fleet.ships.find(x => x.id === plannerFleetId && x.cn === ship.cn);
+    if (f) { f.picks = picksToSave(ship, picks); saveFleet(); renderFleet(); saveMsg.textContent = `Updated ${fleetLabel(f)} in your fleet.`; }
+    else { const n = addToFleet(ship, picks); plannerFleetId = n.id; syncSaveBtn(); saveMsg.textContent = 'Saved. You\'ll find it under Your Fleet.'; }
+  });
+
+  // ---------- tabs ----------
+  const VIEWS = ['planner', 'fleet', 'ask'];
+  function showView(v) {
+    view = VIEWS.includes(v) ? v : 'planner';
+    VIEWS.forEach(x => {
+      document.getElementById('view-' + x).hidden = x !== view;
+      document.getElementById('tab-' + x).setAttribute('aria-selected', String(x === view));
+    });
+    setHash(view === 'planner' ? '#' + slug(ship ? ship.cn : '') : '#' + view);
+    if (view === 'fleet') renderFleet();
+  }
+  document.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b) showView(b.dataset.view); });
+  document.querySelector('.tabs').addEventListener('keydown', e => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const i = VIEWS.indexOf(view), n = VIEWS[(i + (e.key === 'ArrowRight' ? 1 : VIEWS.length - 1)) % VIEWS.length];
+    showView(n); document.getElementById('tab-' + n).focus();
+  });
+
   function fromHash() {
     const h = location.hash.slice(1);
     return h && S.find(s => slug(s.cn) === h);
   }
-  window.addEventListener('hashchange', () => { const s = fromHash(); if (s && s !== ship) setShip(s); });
+  window.addEventListener('hashchange', () => {
+    const h = location.hash.slice(1);
+    if (VIEWS.includes(h) && h !== 'planner') { if (h !== view) showView(h); return; }
+    const s = fromHash(); if (view !== 'planner') showView('planner');
+    if (s && s !== ship) setShip(s);
+  });
 
   syncControls();
+  const startHash = location.hash.slice(1);
   setShip(fromHash() || S.find(s => s.n === 'Aegis Gladius') || S[0]);
+  showView(VIEWS.includes(startHash) ? startHash : 'planner');
+  loadFleet();
   if (CFG.ai === false) aiOff(); else loadModels();
 })();
 </script>

@@ -145,6 +145,82 @@ function buildShips(ships, items) {
   return Object.values(out).sort((a, b) => a.n.localeCompare(b.n));
 }
 
+// ---------------- liveries ----------------
+function addLiveries(rawShips, rawItems, ships) {
+  const paints = [];
+  for (const it of rawItems) {
+    if (it.type !== 'Paints') continue;
+    const s = it.stdItem || {};
+    const n = s.Name || it.name || '';
+    if (badName(n) || /^<|placeholder/i.test(n)) continue;
+    const tags = new Set(s.Tags || (it.tags || '').split(/\s+/).filter(Boolean));
+    paints.push({ cn: it.className, n, tags });
+  }
+  const byCn = Object.fromEntries(paints.map(p => [p.cn, p]));
+  const raw = Object.fromEntries(rawShips.map(s => [s.ClassName, s]));
+  const names = []; const nameIdx = {};
+  const idOf = n => (nameIdx[n] !== undefined ? nameIdx[n] : (nameIdx[n] = names.push(n) - 1));
+  const matchFor = rs => {
+    const port = (rs.Loadout || []).find(l => (l.CompatibleTypes || []).some(c => c.Type === 'Paints'));
+    const req = (port && port.RequiredTags) || [];
+    let list = req.length ? paints.filter(p => req.every(t => p.tags.has(t))) : [];
+    let stock = port && port.ClassName && byCn[port.ClassName] ? byCn[port.ClassName] : null;
+    if (!list.length && stock) {
+      // no required tags: use the stock paint's family tags (e.g. "300i_Paint")
+      const fam = [...stock.tags].filter(t => !t.startsWith('@') && /paint/i.test(t));
+      if (fam.length) list = paints.filter(p => fam.some(t => p.tags.has(t)));
+    }
+    return { list, stock };
+  };
+  const found = {};
+  for (const s of ships) {
+    const rs = raw[s.cn]; if (!rs) continue;
+    const { list, stock } = matchFor(rs);
+    found[s.cn] = { list, stock };
+  }
+  const MAKERS = /^(Aegis|Anvil|Drake|Origin|RSI|MISC|Crusader|Mirai|Esperia|Kruger|Argo|ARGO|Gatac|Aopoa|Banu|C\.O\.|Grey's|Tumbril|Greycat|Vanduul|Consolidated Outland)\s+/;
+  const esc = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const byPhrase = model => {
+    const w = model.split(/\s+/);
+    const tries = [w.join(' '), w.slice(0, -1).join(' '), w.slice(1).join(' '), w[0].replace(/-.*$/, '')];
+    for (const t of tries) {
+      if (!t || t.length < 4) continue;
+      const rx = new RegExp(`^${esc(t)}\\s`, 'i');
+      const hit = paints.filter(p => rx.test(p.n));
+      if (hit.length) return hit;
+    }
+    return [];
+  };
+  for (const s of ships) {
+    let { list, stock } = found[s.cn] || { list: [] };
+    const model = s.n.replace(MAKERS, '').replace(/\s+(Wikelo|Teach's|Best In Show|\d{4}).*$/i, '').trim();
+    if (!list.length) {
+      // variant of another ship (e.g. "Idris-P Wikelo War Special" → "Idris-P", "LN" → "MR"): share its liveries
+      const w = s.n.split(/\s+/);
+      const roman = x => /^(I|II|III|IV|V|Mk)$/i.test(x);
+      const sib = ships.find(o => {
+        if (o === s || !((found[o.cn] || {}).list || []).length) return false;
+        if (s.n.startsWith(o.n + ' ')) return true; // "X Wikelo War Special" → "X"
+        const ow = o.n.split(/\s+/);
+        return w.length >= 4 && ow.length === w.length && o.n.startsWith(w.slice(0, -1).join(' ') + ' ') &&
+          !roman(w[w.length - 1]) && !roman(ow[ow.length - 1]); // "Aurora Mk I LN" → "Aurora Mk I MR", not Mk I → Mk II
+      });
+      if (sib) list = found[sib.cn].list;
+    }
+    if (!list.length) list = byPhrase(model); // liveries named after the model
+    if (!list.length) {
+      const prev = s.n.split(/\s+/).slice(0, 2).join(' ');
+      const sib = ships.find(o => o !== s && o.m === s.m && o.n.startsWith(prev + ' ') && (found[o.cn] || {}).list && found[o.cn].list.length &&
+        o.n.replace(MAKERS, '').split(/\s+/)[0].replace(/-.*$/, '') === model.split(/\s+/)[0].replace(/-.*$/, ''));
+      if (sib) list = found[sib.cn].list;
+    }
+    const ids = [...new Set(list.map(p => idOf(p.n)))].sort((a, b) => names[a].localeCompare(names[b]));
+    if (ids.length) s.lv = ids;
+    if (stock) s.lvs = idOf(stock.n);
+  }
+  return names;
+}
+
 // ---------------- UEX store listings ----------------
 function terminalLocation(t) {
   const name = t.name || t.displayname || t.fullname || '';
@@ -197,7 +273,8 @@ async function buildData({ dataDir, log = console.log }) {
   const game = await fetchGameFiles(log);
   const items = buildItems(game.items);
   const ships = buildShips(game.ships, items);
-  log(`game data: ${ships.length} ships, ${Object.keys(items).length} parts`);
+  const liveries = addLiveries(game.ships, game.items, ships);
+  log(`game data: ${ships.length} ships, ${Object.keys(items).length} parts, ${liveries.length} liveries`);
   const byUuid = {}; for (const [cn, it] of Object.entries(items)) if (it.u) byUuid[it.u] = cn;
 
   let stores, pricesUpdated, priceSource;
@@ -214,7 +291,7 @@ async function buildData({ dataDir, log = console.log }) {
   }
   for (const it of Object.values(items)) delete it.u;
   const data = {
-    ver: game.ver || (prev && prev.ver) || 'unknown', items, ships, stores,
+    ver: game.ver || (prev && prev.ver) || 'unknown', items, ships, stores, liveries,
     gameUpdated: new Date().toISOString(), pricesUpdated, priceSource,
   };
   fs.mkdirSync(dataDir, { recursive: true });
@@ -224,7 +301,7 @@ async function buildData({ dataDir, log = console.log }) {
   return data;
 }
 
-module.exports = { buildData, buildItems, buildShips, terminalLocation };
+module.exports = { buildData, buildItems, buildShips, addLiveries, terminalLocation };
 
 if (require.main === module) {
   buildData({ dataDir: process.env.DATA_DIR || path.join(__dirname, '..', 'data') })
