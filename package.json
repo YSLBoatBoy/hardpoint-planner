@@ -1,0 +1,12 @@
+{
+  "name": "hardpoint-planner",
+  "version": "1.0.0",
+  "description": "Star Citizen loadout optimizer with store locations and Gemini-powered ship Q&A",
+  "private": true,
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server/index.js",
+    "update-data": "node server/update.js"
+  }
+}

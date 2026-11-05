@@ -1,0 +1,18 @@
+# For Unraid's Compose Manager plugin, or any Docker host.
+# Use the published image, or swap `image:` for `build: .` to build from this folder.
+services:
+  hardpoint-planner:
+    image: ghcr.io/yslboatboy/hardpoint-planner:latest
+    container_name: hardpoint-planner
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /mnt/user/appdata/hardpoint-planner:/data
+    environment:
+      GEMINI_API_KEY: ""            # from https://aistudio.google.com/apikey — leave empty to turn questions off
+      GEMINI_MODELS: ""             # optional: comma list to limit/order models, e.g. gemini-3.6-flash,gemini-3.5-flash-lite
+      UPDATE_INTERVAL_HOURS: "12"   # how often to refresh game data and store prices (0 = never)
+      UEX_API_TOKEN: ""             # optional: UEX bearer token, only if UEX starts requiring one
+      PRICE_MAX_AGE_DAYS: "180"     # ignore store prices older than this
+      TZ: "America/Chicago"

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>hardpoint-planner</Name>
+  <Repository>ghcr.io/yslboatboy/hardpoint-planner:latest</Repository>
+  <Registry>https://github.com/YSLBoatBoy/hardpoint-planner/pkgs/container/hardpoint-planner</Registry>
+  <Network>bridge</Network>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/YSLBoatBoy/hardpoint-planner/issues</Support>
+  <Project>https://github.com/YSLBoatBoy/hardpoint-planner</Project>
+  <Overview>Star Citizen loadout optimizer. Picks the best weapons, shields, power plants, coolers and quantum drive for any ship, shows which stores sell each part and on which planet, explains what each ship is best at, and answers questions about your ship using Google Gemini. Game data and store prices refresh automatically.</Overview>
+  <Category>GameServers: Tools:</Category>
+  <WebUI>http://[IP]:[PORT:8080]/</WebUI>
+  <Icon>https://raw.githubusercontent.com/YSLBoatBoy/hardpoint-planner/main/unraid/icon.png</Icon>
+  <ExtraParams>--restart unless-stopped</ExtraParams>
+  <Config Name="Web UI port" Target="8080" Default="8080" Mode="tcp" Description="Port for the web page." Type="Port" Display="always" Required="true" Mask="false">8080</Config>
+  <Config Name="Data" Target="/data" Default="/mnt/user/appdata/hardpoint-planner" Mode="rw" Description="Stores the refreshed game data and prices." Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/hardpoint-planner</Config>
+  <Config Name="Gemini API key" Target="GEMINI_API_KEY" Default="" Mode="" Description="Get one free at https://aistudio.google.com/apikey. Leave empty to turn off the question box." Type="Variable" Display="always" Required="false" Mask="true"></Config>
+  <Config Name="Gemini models" Target="GEMINI_MODELS" Default="" Mode="" Description="Optional comma-separated list to limit and order models, e.g. gemini-3.6-flash,gemini-3.5-flash-lite. Empty = every text model your key can use." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="Update interval (hours)" Target="UPDATE_INTERVAL_HOURS" Default="12" Mode="" Description="How often to refresh game data and store prices. 0 turns automatic updates off." Type="Variable" Display="advanced" Required="false" Mask="false">12</Config>
+  <Config Name="Max price age (days)" Target="PRICE_MAX_AGE_DAYS" Default="180" Mode="" Description="Ignore store listings older than this many days." Type="Variable" Display="advanced" Required="false" Mask="false">180</Config>
+  <Config Name="UEX API token" Target="UEX_API_TOKEN" Default="" Mode="" Description="Optional. Only needed if UEX starts requiring a token for price data." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <Config Name="Questions per 10 minutes" Target="ASK_LIMIT_PER_10MIN" Default="30" Mode="" Description="Per-device limit so nobody burns through your Gemini quota." Type="Variable" Display="advanced" Required="false" Mask="false">30</Config>
+  <Config Name="Time zone" Target="TZ" Default="America/Chicago" Mode="" Description="Used for log timestamps." Type="Variable" Display="advanced" Required="false" Mask="false">America/Chicago</Config>
+</Container>

@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Hardpoint Planner</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23b35d06'/%3E%3Cpath d='M16 5l4 9h7l-6 5 2 9-7-5-7 5 2-9-6-5h7z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: control deck on top, two columns below — slot sheet (left), readout + shopping route (right, sticky). */
+:root {
+  --bg: #edf0f2;
+  --panel: #ffffff;
+  --panel-2: #f5f7f8;
+  --ink: #16212b;
+  --muted: #5a6773;
+  --line: #d2d8de;
+  --accent: #b35d06;
+  --accent-soft: #fbe9d4;
+  --accent-ink: #ffffff;
+  --energy: #1c6fae;
+  --ballistic: #8a5d00;
+  --distortion: #7348b8;
+  --good: #1b7543;
+  --bad: #b3261e;
+  --shadow: 0 1px 2px rgba(22,33,43,.06), 0 4px 16px rgba(22,33,43,.05);
+  --f-display: "Saira Condensed", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1318; --panel: #141c23; --panel-2: #10171d; --ink: #e1e8ee; --muted: #8e9ba7; --line: #25303a;
+    --accent: #f0a03c; --accent-soft: #3a2a14; --accent-ink: #1a1206;
+    --energy: #62b4ff; --ballistic: #e0b24e; --distortion: #b993ff; --good: #4fc58c; --bad: #ff8073;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1318; --panel: #141c23; --panel-2: #10171d; --ink: #e1e8ee; --muted: #8e9ba7; --line: #25303a;
+  --accent: #f0a03c; --accent-soft: #3a2a14; --accent-ink: #1a1206;
+  --energy: #62b4ff; --ballistic: #e0b24e; --distortion: #b993ff; --good: #4fc58c; --bad: #ff8073;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+.wrap { max-width: 1320px; margin: 0 auto; display: grid; gap: 20px; }
+.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 700; letter-spacing: .01em; margin: 0; text-wrap: balance; }
+
+/* header */
+header.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px; padding-top: 22px; border-bottom: 2px solid var(--ink); padding-bottom: 10px; }
+header.top h1 { font-size: 34px; line-height: 1; text-transform: uppercase; letter-spacing: .04em; }
+header.top h1 span { color: var(--accent); }
+.patch { font-family: var(--f-mono); font-size: 12px; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
+.patch b { color: var(--ink); font-weight: 500; }
+.linkbtn { font: inherit; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.linkbtn:disabled { color: var(--muted); cursor: default; text-decoration: none; }
+.linkbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.modelrow { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.modelrow select { font: 500 13.5px var(--f-body); color: var(--ink); background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 5px 6px; max-width: 100%; min-width: 0; }
+.modelrow select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.switched { font-size: 12.5px; color: var(--accent); }
+
+/* presets + command */
+.presets { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr); gap: 20px; align-items: start; }
+.cmd label, .prelabel { display: block; font-family: var(--f-display); font-weight: 600; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.cmdrow { display: flex; gap: 8px; }
+.cmdrow input { flex: 1; min-width: 0; font: 500 16px var(--f-body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; padding: 10px 12px; }
+.cmdrow input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.btn.go { font: 700 16px var(--f-display); letter-spacing: .06em; text-transform: uppercase; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 6px; padding: 0 16px; cursor: pointer; white-space: nowrap; }
+.cmdmsg { margin-top: 6px; font-size: 13.5px; color: var(--muted); min-height: 1.4em; }
+.cmdmsg.ok { color: var(--good); } .cmdmsg.err { color: var(--bad); }
+.prebtns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.prebtns button { text-align: left; background: var(--panel); color: var(--ink); border: 1.5px solid var(--line); border-radius: 6px; padding: 10px 12px; cursor: pointer; min-width: 0; }
+.prebtns button:hover { border-color: var(--accent); }
+.prebtns button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.prebtns button b { display: block; font: 700 19px/1.1 var(--f-display); letter-spacing: .03em; text-transform: uppercase; }
+.prebtns button small { display: block; font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+.prebtns button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.prebtns button[aria-pressed="true"] small { color: var(--accent-ink); opacity: .85; }
+@media (max-width: 980px) { .presets { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .prebtns { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* profile + ask */
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.eyebrow { display: block; font: 600 12px var(--f-display); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.intel { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.profile, .ask { padding: 16px 18px; }
+.prof-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.profile h2, .ask h2 { font-size: 24px; text-transform: uppercase; letter-spacing: .04em; }
+.btn.suggest { font: 600 14px var(--f-body); background: var(--accent-soft); color: var(--ink); border: 1.5px solid var(--accent); border-radius: 6px; padding: 8px 12px; cursor: pointer; }
+.btn.suggest:hover { background: var(--accent); color: var(--accent-ink); }
+.btn.suggest[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); cursor: default; }
+.prof-lead { font-size: 17px; line-height: 1.45; margin: 8px 0 14px; max-width: 70ch; }
+.prof-lead b { color: var(--accent); font-weight: 600; }
+.prof-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 22px; }
+.bars { display: grid; gap: 9px; align-content: start; }
+.bar .lbl { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.bar .lbl span:first-child { text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-size: 12px; }
+.bar .track { height: 8px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 2px; margin-top: 4px; position: relative; }
+.bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--ink); border-radius: 1px; }
+.bar .fill.hi { background: var(--good); } .bar .fill.lo { background: var(--bad); }
+.bar .mid { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--muted); opacity: .6; }
+.barnote { font-size: 12px; color: var(--muted); }
+.prof-notes h3 { font: 600 13px var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
+.prof-notes h3 + ul + h3 { margin-top: 10px; }
+.prof-notes ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14.5px; }
+#prof-good li::marker { color: var(--good); } #prof-bad li::marker { color: var(--bad); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.chips button { font: 500 13px var(--f-body); color: var(--ink); background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; cursor: pointer; text-align: left; }
+.chips button:hover { border-color: var(--accent); }
+.chips button:focus-visible, .btn.suggest:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.thread { display: grid; gap: 10px; max-height: 420px; overflow-y: auto; }
+.thread:empty { display: none; }
+.q { justify-self: end; max-width: 90%; background: var(--ink); color: var(--bg); padding: 7px 11px; border-radius: 10px 10px 2px 10px; font-size: 14.5px; }
+.a { background: var(--panel-2); border: 1px solid var(--line); padding: 9px 12px; border-radius: 10px 10px 10px 2px; font-size: 14.5px; line-height: 1.5; min-width: 0; overflow-wrap: anywhere; }
+.a p { margin: 0 0 6px; } .a p:last-child { margin-bottom: 0; }
+.a ul { margin: 0 0 6px; padding-left: 18px; }
+.a.wait { color: var(--muted); font-style: italic; }
+.a.err { color: var(--bad); }
+.askrow { display: flex; gap: 8px; margin-top: 10px; }
+.askrow input { flex: 1; min-width: 0; font: 500 15px var(--f-body); color: var(--ink); background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; padding: 9px 11px; }
+.askrow input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.askrow .btn.go { padding: 0 14px; }
+.askrow .btn.go.stop { background: var(--ink); color: var(--bg); }
+.askhint { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }
+@media (max-width: 980px) { .intel { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) { .prof-body { grid-template-columns: minmax(0, 1fr); } }
+
+/* control deck */
+.deck { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr); gap: 20px; align-items: start; }
+.shippick label, .ctl > span { display: block; font-family: var(--f-display); font-weight: 600; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.shippick input {
+  width: 100%; font: 600 22px/1.2 var(--f-display); letter-spacing: .02em; color: var(--ink);
+  background: var(--panel); border: 1.5px solid var(--line); border-radius: 6px; padding: 10px 12px;
+}
+.shippick input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.shipmeta { margin-top: 8px; color: var(--muted); font-size: 14px; min-height: 1.4em; }
+.shipmeta b { color: var(--ink); font-weight: 600; }
+.ctls { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px 18px; }
+.seg { display: flex; flex-wrap: wrap; gap: 4px; }
+.seg button {
+  font: 500 13.5px/1 var(--f-body); color: var(--ink); background: var(--panel); border: 1px solid var(--line);
+  padding: 7px 10px; border-radius: 4px; cursor: pointer;
+}
+.seg button:hover { border-color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.seg button:focus-visible, .btn:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-top: 6px; cursor: pointer; }
+.check input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+/* main grid */
+.main { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); }
+.sheet { padding: 4px 0 8px; }
+.grp { padding: 14px 18px 4px; }
+.grp + .grp { border-top: 1px dashed var(--line); }
+.grp h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; }
+.grp h2 .num { font-size: 12px; letter-spacing: 0; font-weight: 400; }
+.slot { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 4px 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.slot:last-child { border-bottom: 0; }
+.sz {
+  grid-row: span 2; align-self: start; font: 600 15px/1 var(--f-mono); text-align: center; padding: 8px 0 6px;
+  border: 1.5px solid var(--ink); border-radius: 3px; position: relative;
+}
+.sz small { display: block; font: 600 9px/1 var(--f-display); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.slot-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-width: 0; }
+.slot-label { font-size: 12.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.slot select {
+  flex: 1 1 260px; min-width: 0; max-width: 100%; font: 500 15px var(--f-body); color: var(--ink);
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 7px 8px;
+}
+.slot.changed select { border-color: var(--accent); background: var(--accent-soft); }
+.slot-info { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--muted); align-items: center; min-width: 0; }
+.slot-info .num { color: var(--ink); }
+.tag { font: 600 11px/1 var(--f-display); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px 3px; border-radius: 3px; border: 1px solid currentColor; white-space: nowrap; }
+.t-Energy { color: var(--energy); } .t-Ballistic { color: var(--ballistic); } .t-Distortion { color: var(--distortion); } .t-Thermal { color: var(--bad); }
+.t-lock { color: var(--muted); }
+.t-pin { color: var(--accent); }
+.where { color: var(--ink); }
+.where.none { color: var(--muted); font-style: italic; }
+.btn-reset { font: 500 12.5px var(--f-body); color: var(--accent); background: none; border: 0; padding: 2px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+
+/* readout */
+.side { display: grid; gap: 20px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+.readout { padding: 16px 18px; }
+.readout h2, .route h2 { font-size: 20px; text-transform: uppercase; letter-spacing: .06em; }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 18px; margin-top: 10px; }
+.stat { padding: 9px 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.stat .k { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.stat .v { font: 500 20px/1.2 var(--f-mono); font-variant-numeric: tabular-nums; }
+.stat .d { font: 400 12px var(--f-mono); color: var(--muted); }
+.stat .d.up { color: var(--good); } .stat .d.down { color: var(--bad); }
+.costline { margin-top: 12px; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.costline .v { font: 600 26px/1 var(--f-mono); color: var(--accent); }
+.costline .k { font-size: 13px; color: var(--muted); }
+
+.route { padding: 16px 18px; }
+.route .sub { color: var(--muted); font-size: 13.5px; margin: 4px 0 12px; }
+.stops { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: stop; }
+.stop { border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px 10px 46px; position: relative; counter-increment: stop; background: var(--panel-2); }
+.stop::before {
+  content: counter(stop); position: absolute; left: 10px; top: 10px; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent); color: var(--accent-ink); font: 600 14px/26px var(--f-mono); text-align: center;
+}
+.stop .store { font: 700 17px/1.15 var(--f-display); letter-spacing: .02em; }
+.stop .loc { font-size: 13px; color: var(--muted); margin: 2px 0 6px; }
+.stop .loc b { color: var(--ink); font-weight: 600; }
+.buy { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; padding: 3px 0; border-top: 1px dotted var(--line); }
+.buy:first-of-type { border-top: 0; }
+.buy .num { white-space: nowrap; }
+details.alt { margin-top: 6px; font-size: 13px; color: var(--muted); }
+details.alt summary { cursor: pointer; }
+details.alt ul { margin: 6px 0 0; padding-left: 18px; }
+.nostock { margin-top: 12px; font-size: 13.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+.nostock b { color: var(--ink); font-weight: 600; }
+.empty { color: var(--muted); font-size: 14px; padding: 8px 0; }
+
+footer.notes { color: var(--muted); font-size: 13px; max-width: 80ch; display: grid; gap: 6px; }
+footer.notes a { color: inherit; }
+
+@media (max-width: 980px) {
+  .deck, .main { grid-template-columns: minmax(0, 1fr); }
+  .side { position: static; order: -1; }
+}
+@media (max-width: 460px) {
+  header.top h1 { font-size: 28px; }
+  .stats { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 12px; }
+  .stat .v { font-size: 17px; }
+  .grp { padding: 12px 12px 4px; }
+  .slot { grid-template-columns: 44px minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .slot.changed select { transition: background-color .25s; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Hardpoint <span>Planner</span></h1>
+    <div class="patch"><span>Game data <b id="ver">—</b></span><span>Prices <b id="priced">—</b></span><button class="linkbtn" id="refresh" type="button">Refresh data</button></div>
+  </header>
+
+  <section class="presets" aria-label="Quick loadouts">
+    <form class="cmd" id="cmdform">
+      <label for="cmd">Ask for a loadout</label>
+      <div class="cmdrow">
+        <input id="cmd" autocomplete="off" spellcheck="false" placeholder="Best PvE loadout for the Cutlass Black in Pyro">
+        <button type="submit" class="btn go">Build it</button>
+      </div>
+      <div class="cmdmsg" id="cmdmsg" role="status" aria-live="polite">Type it or use your keyboard's mic to say it.</div>
+    </form>
+    <div class="pre">
+      <span class="prelabel">Or tap a goal</span>
+      <div class="prebtns" id="prebtns">
+        <button data-p="pve"><b>Best PvE</b><small>Bounties &amp; missions vs NPCs</small></button>
+        <button data-p="pvp"><b>Best PvP</b><small>Dogfighting other players</small></button>
+        <button data-p="stealth"><b>Stealth</b><small>Low signature, first shot</small></button>
+        <button data-p="travel"><b>Travel</b><small>Fast quantum, tough shields</small></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="deck" aria-label="Ship and goals">
+    <div class="shippick">
+      <label for="ship">Ship</label>
+      <input id="ship" list="shiplist" autocomplete="off" spellcheck="false" placeholder="Type a ship name…">
+      <datalist id="shiplist"></datalist>
+      <div class="shipmeta" id="shipmeta"></div>
+    </div>
+    <div class="ctls">
+      <div class="ctl"><span>Weapon priority</span>
+        <div class="seg" data-key="wp">
+          <button data-v="burst">Burst DPS</button><button data-v="sustained">Sustained DPS</button><button data-v="alpha">Alpha</button><button data-v="range">Range</button>
+        </div>
+        <label class="check"><input type="checkbox" id="noScatter"> Skip scatterguns (short range)</label>
+      </div>
+      <div class="ctl"><span>Damage type</span>
+        <div class="seg" data-key="dt">
+          <button data-v="any">Any</button><button data-v="Energy">Energy</button><button data-v="Ballistic">Ballistic</button><button data-v="Distortion">Distortion</button>
+        </div>
+      </div>
+      <div class="ctl"><span>Shields</span>
+        <div class="seg" data-key="sh">
+          <button data-v="balanced">Balanced</button><button data-v="hp">Max HP</button><button data-v="regen">Fast regen</button>
+        </div>
+      </div>
+      <div class="ctl"><span>Component class</span>
+        <div class="seg" data-key="cls">
+          <button data-v="Military">Military</button><button data-v="Stealth">Stealth</button><button data-v="Competition">Competition</button><button data-v="any">Any</button>
+        </div>
+      </div>
+      <div class="ctl"><span>Quantum drive</span>
+        <div class="seg" data-key="qd">
+          <button data-v="speed">Top speed</button><button data-v="spool">Fast spool</button>
+        </div>
+      </div>
+      <div class="ctl"><span>Shop in</span>
+        <div class="seg" data-key="sys">
+          <button data-v="any">Anywhere</button><button data-v="Stanton">Stanton</button><button data-v="Pyro">Pyro</button><button data-v="Nyx">Nyx</button>
+        </div>
+        <label class="check"><input type="checkbox" id="buyOnly"> Only recommend parts sold in stores</label>
+      </div>
+    </div>
+  </section>
+
+  <div class="intel">
+    <section class="panel profile" aria-labelledby="prof-h">
+      <div class="prof-top">
+        <div>
+          <span class="eyebrow">Ship profile</span>
+          <h2 id="prof-h">Best use</h2>
+        </div>
+        <button class="btn suggest" id="prof-apply" type="button"></button>
+      </div>
+      <p class="prof-lead" id="prof-lead"></p>
+      <div class="prof-body">
+        <div class="bars" id="prof-bars" aria-label="Ratings against ships of the same size"></div>
+        <div class="prof-notes">
+          <h3>Strengths</h3><ul id="prof-good"></ul>
+          <h3>Watch out for</h3><ul id="prof-bad"></ul>
+        </div>
+      </div>
+    </section>
+    <section class="panel ask" aria-labelledby="ask-h">
+      <span class="eyebrow">Ask Gemini</span>
+      <h2 id="ask-h">Questions about the <span id="ask-ship">ship</span></h2>
+      <div class="chips" id="ask-chips"></div>
+      <div class="thread" id="thread" aria-live="polite"></div>
+      <form class="askrow" id="askform">
+        <label for="askq" class="sr">Your question</label>
+        <input id="askq" autocomplete="off" placeholder="Is this ship good for bounty hunting?">
+        <button class="btn go" id="askbtn" type="submit">Ask</button>
+      </form>
+      <div class="modelrow">
+        <label for="model">Model</label>
+        <select id="model"><option value="auto">Auto (first available)</option></select>
+        <span class="switched" id="switched" role="status" aria-live="polite"></span>
+      </div>
+      <p class="askhint" id="askhint">Answers use this ship's game data and your current loadout.</p>
+    </section>
+  </div>
+
+  <div class="main">
+    <section class="panel sheet" id="sheet" aria-label="Loadout"></section>
+    <aside class="side">
+      <section class="panel readout" aria-label="Stats">
+        <h2>Readout</h2>
+        <div class="stats" id="stats"></div>
+        <div class="costline"><span class="k">Cost of upgrades (cheapest stores)</span><span class="v num" id="cost">0</span></div>
+      </section>
+      <section class="panel route" aria-label="Where to buy">
+        <h2>Where to buy</h2>
+        <p class="sub" id="routesub"></p>
+        <ol class="stops" id="stops"></ol>
+        <div id="nostock"></div>
+      </section>
+    </aside>
+  </div>
+
+  <footer class="notes">
+    <p>Stats come from the unpacked game files for patch <span id="ver2">—</span>. Store locations and prices are player-reported to UEX and can lag behind the live game, so confirm at the kiosk. Parts with no store listing are usually loot, crafted, or come only as ship stock. This server refreshes both on a schedule.</p>
+    <p>Totals add up raw component numbers. Power and cooling pip allocation, heat, and missiles aren't modeled, so check your power triangle in game after fitting.</p>
+    <p>Data: <a href="https://github.com/StarCitizenWiki/scunpacked-data" target="_blank" rel="noopener">scunpacked-data</a>, <a href="https://api.star-citizen.wiki" target="_blank" rel="noopener">Star Citizen Wiki API</a>, <a href="https://uexcorp.space" target="_blank" rel="noopener">UEX Corp</a>.</p>
+  </footer>
+</div>
+
+<script id="data" type="application/json">/*DATA*/</script>
+<script id="cfg" type="application/json">/*CFG*/</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById('data').textContent);
+  let CFG = {}; try { CFG = JSON.parse(document.getElementById('cfg').textContent); } catch (e) {}
+  const I = D.items, S = D.ships, ST = D.stores;
+  document.getElementById('ver').textContent = D.ver;
+  document.getElementById('ver2').textContent = D.ver;
+
+  // ---------- data freshness + refresh ----------
+  const ago = iso => {
+    if (!iso) return 'snapshot';
+    const h = (Date.now() - Date.parse(iso)) / 3600e3;
+    if (h < 1) return 'just now'; if (h < 24) return `${Math.round(h)} h ago`;
+    return new Date(iso).toLocaleDateString([], { month: 'short', day: 'numeric' });
+  };
+  document.getElementById('priced').textContent = ago(CFG.pricesUpdated);
+  const refreshBtn = document.getElementById('refresh');
+  let polling = null;
+  async function pollStatus() {
+    try {
+      const j = await (await fetch('api/status', { cache: 'no-store' })).json();
+      if (j.updating) { refreshBtn.textContent = 'Updating…'; refreshBtn.disabled = true; return; }
+      clearInterval(polling); polling = null;
+      if (j.lastError) { refreshBtn.textContent = 'Update failed, try later'; refreshBtn.title = j.lastError; refreshBtn.disabled = false; return; }
+      if (j.gameUpdated !== CFG.gameUpdated || j.pricesUpdated !== CFG.pricesUpdated) { refreshBtn.textContent = 'New data ready, reload'; refreshBtn.disabled = false; refreshBtn.dataset.reload = '1'; }
+      else { refreshBtn.textContent = 'Refresh data'; refreshBtn.disabled = false; }
+    } catch (e) { /* server unreachable */ }
+  }
+  refreshBtn.addEventListener('click', async () => {
+    if (refreshBtn.dataset.reload) { location.reload(); return; }
+    refreshBtn.disabled = true; refreshBtn.textContent = 'Starting…';
+    try {
+      const r = await fetch('api/refresh', { method: 'POST' }); const j = await r.json();
+      if (r.status === 429) { refreshBtn.textContent = 'Refreshed recently'; refreshBtn.title = j.message; setTimeout(() => { refreshBtn.textContent = 'Refresh data'; refreshBtn.disabled = false; }, 8000); return; }
+    } catch (e) { refreshBtn.textContent = 'Server unreachable'; refreshBtn.disabled = false; return; }
+    if (!polling) polling = setInterval(pollStatus, 4000);
+    pollStatus();
+  });
+  fetch('api/status', { cache: 'no-store' }).then(r => r.json()).then(j => { if (j.updating && !polling) { polling = setInterval(pollStatus, 4000); pollStatus(); } }).catch(() => {});
+
+  const DEF = { wp: 'burst', dt: 'any', sh: 'balanced', cls: 'Military', qd: 'speed', sys: 'any', noScatter: true, buyOnly: true };
+  let prefs = Object.assign({}, DEF);
+  try { const saved = JSON.parse(localStorage.getItem('hp-prefs') || 'null'); if (saved) prefs = Object.assign(prefs, saved); } catch (e) {}
+  const save = () => { try { localStorage.setItem('hp-prefs', JSON.stringify(prefs)); } catch (e) {} };
+
+  let ship = null, picks = [], manual = {};
+  const fmt = n => Math.round(n).toLocaleString('en-US');
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const slug = cn => cn.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const GR = { A: 4, B: 3, C: 2, D: 1, '?': 0 };
+
+  // ---------- store helpers ----------
+  function storesFor(cn) {
+    const it = I[cn]; if (!it || !it.sh) return [];
+    return Object.entries(it.sh).map(([sid, p]) => ({ sid: +sid, p, s: ST[+sid] }))
+      .filter(x => prefs.sys === 'any' || x.s[3] === prefs.sys).sort((a, b) => a.p - b.p);
+  }
+  const buyable = cn => storesFor(cn).length > 0;
+  const cheapest = cn => { const l = storesFor(cn); return l.length ? l[0].p : null; };
+
+  // ---------- candidates & scoring ----------
+  function candidates(slot) {
+    return Object.keys(I).filter(cn => {
+      const it = I[cn];
+      if (it.cat !== slot.cat) return false;
+      return slot.cat === 'gun' ? (it.s >= slot.mn && it.s <= slot.s) : it.s === slot.s;
+    });
+  }
+  function score(cn) {
+    const it = I[cn];
+    switch (it.cat) {
+      case 'gun': {
+        const k = { burst: 'b', sustained: 'su', alpha: 'a', range: 'rg' }[prefs.wp];
+        return it[k] + it.b / 1e6;
+      }
+      case 'shield': {
+        const v = prefs.sh === 'hp' ? it.hp : prefs.sh === 'regen' ? it.rg : it.hp / 1000 + it.rg / 100;
+        return v + GR[it.g] / 1e3;
+      }
+      case 'power': return prefs.cls === 'Stealth' ? GR[it.g] * 1e6 - it.em : it.out * 10 + GR[it.g];
+      case 'cooler': return prefs.cls === 'Stealth' ? GR[it.g] * 1e6 - it.ir : it.out * 10 + GR[it.g];
+      case 'qd': return prefs.qd === 'spool' ? -it.spool * 1e6 + it.sp : it.sp + GR[it.g];
+    }
+    return 0;
+  }
+  function best(slot) {
+    if (!slot.ed) return slot.st;
+    let pool = candidates(slot);
+    if (prefs.buyOnly) pool = pool.filter(buyable);
+    if (!pool.length) return slot.st;
+    if (slot.cat === 'gun') {
+      let p = pool;
+      if (prefs.noScatter) { const q = p.filter(cn => !/Scatter/i.test(I[cn].k)); if (q.length) p = q; }
+      if (prefs.dt !== 'any') { const q = p.filter(cn => I[cn].dt === prefs.dt); if (q.length) p = q; }
+      // prefer the slot's full size when it's available
+      const full = p.filter(cn => I[cn].s === slot.s); if (full.length) p = full;
+      pool = p;
+    } else if (prefs.cls !== 'any') {
+      const q = pool.filter(cn => I[cn].c === prefs.cls); if (q.length) pool = q;
+    }
+    return pool.sort((a, b) => score(b) - score(a) || (cheapest(a) || 1e12) - (cheapest(b) || 1e12))[0];
+  }
+
+  // ---------- stats ----------
+  function stats(list) {
+    const t = { pb: 0, ps: 0, pa: 0, cb: 0, hp: 0, rg: 0, pw: 0, cl: 0, qd: 0 };
+    ship.slots.forEach((sl, i) => {
+      const it = I[list[i]]; if (!it) return;
+      if (sl.cat === 'gun') { if (sl.crew) t.cb += it.b; else { t.pb += it.b; t.ps += it.su; t.pa += it.a; } }
+      else if (sl.cat === 'shield') { t.hp += it.hp; t.rg += it.rg; }
+      else if (sl.cat === 'power') t.pw += it.out;
+      else if (sl.cat === 'cooler') t.cl += it.out;
+      else if (sl.cat === 'qd') t.qd = Math.max(t.qd, it.sp);
+    });
+    return t;
+  }
+
+  // ---------- render: slot sheet ----------
+  const GROUPS = [
+    ['pilot', 'Pilot weapons', sl => sl.cat === 'gun' && !sl.crew],
+    ['crew', 'Crew turrets', sl => sl.cat === 'gun' && sl.crew],
+    ['shield', 'Shields', sl => sl.cat === 'shield'],
+    ['power', 'Power plants', sl => sl.cat === 'power'],
+    ['cooler', 'Coolers', sl => sl.cat === 'cooler'],
+    ['qd', 'Quantum drive', sl => sl.cat === 'qd'],
+  ];
+  function itemStat(cn) {
+    const it = I[cn]; if (!it) return '';
+    switch (it.cat) {
+      case 'gun': return `<span class="tag t-${it.dt}">${esc(it.dt)}</span><span>${esc(it.k || 'Gun')}</span><span><span class="num">${fmt(it.b)}</span> burst</span><span><span class="num">${fmt(it.su)}</span> sustained</span><span><span class="num">${fmt(it.a)}</span> alpha</span><span><span class="num">${fmt(it.rg)}</span> m</span>`;
+      case 'shield': return `<span>Grade ${it.g} · ${esc(it.c)}</span><span><span class="num">${fmt(it.hp)}</span> HP</span><span><span class="num">${fmt(it.rg)}</span> regen/s</span>`;
+      case 'power': return `<span>Grade ${it.g} · ${esc(it.c)}</span><span><span class="num">${fmt(it.out)}</span> power</span><span>EM <span class="num">${fmt(it.em)}</span></span>`;
+      case 'cooler': return `<span>Grade ${it.g} · ${esc(it.c)}</span><span><span class="num">${fmt(it.out)}</span> coolant</span><span>IR <span class="num">${fmt(it.ir)}</span></span>`;
+      case 'qd': return `<span>Grade ${it.g} · ${esc(it.c)}</span><span><span class="num">${fmt(it.sp)}</span> km/s</span><span>spool <span class="num">${it.spool}</span> s</span>`;
+    }
+    return '';
+  }
+  function optLabel(cn, slot) {
+    const it = I[cn];
+    let key = '';
+    if (it.cat === 'gun') key = `${fmt(it.b)} burst · ${it.dt}`;
+    else if (it.cat === 'shield') key = `${fmt(it.hp)} HP · ${fmt(it.rg)}/s · ${it.g}`;
+    else if (it.cat === 'power' || it.cat === 'cooler') key = `${fmt(it.out)} · ${it.g} ${it.c}`;
+    else if (it.cat === 'qd') key = `${fmt(it.sp)} km/s · ${it.g}`;
+    const p = cheapest(cn);
+    const sz = it.cat === 'gun' && it.s !== slot.s ? ` (S${it.s})` : '';
+    return `${it.n}${sz} — ${key} — ${p ? fmt(p) + ' aUEC' : 'not in stores'}${cn === slot.st ? ' · stock' : ''}`;
+  }
+  function whereText(cn, slot) {
+    if (cn === slot.st) return '<span class="where none">Stock part</span>';
+    const l = storesFor(cn);
+    if (!l.length) return '<span class="where none">No store listing</span>';
+    const s = l[0].s;
+    return `<span class="where">${esc(s[0])}, ${esc(s[1])} · <span class="num">${fmt(l[0].p)}</span> aUEC${l.length > 1 ? ` <span style="color:var(--muted)">+${l.length - 1} more</span>` : ''}</span>`;
+  }
+  function renderSheet() {
+    const el = document.getElementById('sheet');
+    let html = '';
+    GROUPS.forEach(([key, title, fn]) => {
+      const idx = ship.slots.map((s, i) => i).filter(i => fn(ship.slots[i]));
+      if (!idx.length) return;
+      let sum = '';
+      if (key === 'pilot' || key === 'crew') sum = `${fmt(idx.reduce((a, i) => a + (I[picks[i]] ? I[picks[i]].b : 0), 0))} burst DPS`;
+      html += `<div class="grp"><h2>${title}<span class="num">${idx.length} slot${idx.length > 1 ? 's' : ''}${sum ? ' · ' + sum : ''}</span></h2>`;
+      idx.forEach(i => {
+        const sl = ship.slots[i], cn = picks[i];
+        const opts = candidates(sl).sort((a, b) => score(b) - score(a));
+        if (sl.st && !opts.includes(sl.st)) opts.push(sl.st);
+        const changed = sl.st !== cn;
+        const mount = sl.cat === 'gun' ? (sl.mt === 'Gimbal' ? 'Gimbal' : sl.mt === 'Turret' ? 'Turret' : 'Fixed') : ({ shield: 'Shield', power: 'Power', cooler: 'Cooler', qd: 'QD' })[sl.cat];
+        html += `<div class="slot${changed ? ' changed' : ''}">
+          <div class="sz">S${sl.s}<small>${mount}</small></div>
+          <div class="slot-head">
+            <span class="slot-label">${esc(sl.grp)}</span>
+            ${!sl.ed ? '<span class="tag t-lock">Locked</span>' : ''}
+            ${sl.ed && !manual[i] && sl.cat !== 'gun' && prefs.cls !== 'any' && cn && I[cn].c !== prefs.cls ? `<span class="tag t-lock" title="No ${esc(prefs.cls)} part of this size is listed in stores, so the best buyable one is shown">No ${esc(prefs.cls)} for sale</span>` : ''}
+            ${manual[i] ? '<span class="tag t-pin">Your pick</span> <button class="btn-reset" data-reset="' + i + '">Use recommended</button>' : ''}
+            <select id="slot-${i}" data-i="${i}" ${sl.ed ? '' : 'disabled'} aria-label="${esc(sl.grp)} size ${sl.s}">
+              ${opts.map(o => `<option value="${esc(o)}"${o === cn ? ' selected' : ''}>${esc(optLabel(o, sl))}</option>`).join('')}
+              ${!cn ? '<option selected value="">Empty</option>' : ''}
+            </select>
+          </div>
+          <div class="slot-info">${cn ? itemStat(cn) : ''} ${cn ? whereText(cn, sl) : ''}</div>
+        </div>`;
+      });
+      html += '</div>';
+    });
+    if (!html) html = '<div class="grp"><p class="empty">This ship has no swappable weapons or components in the game files.</p></div>';
+    el.innerHTML = html;
+  }
+
+  // ---------- render: readout ----------
+  function renderStats() {
+    const a = stats(ship.slots.map(s => s.st)), b = stats(picks);
+    const rows = [
+      ['Pilot burst DPS', 'pb'], ['Pilot sustained DPS', 'ps'], ['Pilot alpha', 'pa'], ['Turret burst DPS', 'cb'],
+      ['Shield HP', 'hp'], ['Shield regen /s', 'rg'], ['Power output', 'pw'], ['Cooling', 'cl'], ['Quantum km/s', 'qd'],
+    ].filter(([, k]) => a[k] || b[k]);
+    document.getElementById('stats').innerHTML = rows.map(([label, k]) => {
+      const d = a[k] ? (b[k] - a[k]) / a[k] * 100 : 0;
+      const cls = Math.abs(d) < 0.5 ? '' : d > 0 ? 'up' : 'down';
+      const dt = Math.abs(d) < 0.5 ? 'same as stock' : `${d > 0 ? '+' : ''}${d.toFixed(0)}% vs stock ${fmt(a[k])}`;
+      return `<div class="stat"><div class="k">${label}</div><div class="v">${fmt(b[k])}</div><div class="d ${cls}">${dt}</div></div>`;
+    }).join('');
+  }
+
+  // ---------- render: shopping route ----------
+  function renderRoute() {
+    const need = {};
+    ship.slots.forEach((sl, i) => { const cn = picks[i]; if (cn && cn !== sl.st) need[cn] = (need[cn] || 0) + 1; });
+    const names = Object.keys(need);
+    const sold = names.filter(cn => storesFor(cn).length), unsold = names.filter(cn => !storesFor(cn).length);
+    // greedy: fewest stops, then cheapest
+    let left = new Set(sold); const stops = []; let total = 0;
+    while (left.size) {
+      const cover = {};
+      left.forEach(cn => storesFor(cn).forEach(x => { (cover[x.sid] = cover[x.sid] || []).push([cn, x.p]); }));
+      const sid = Object.keys(cover).sort((p, q) => cover[q].length - cover[p].length ||
+        cover[p].reduce((s, x) => s + x[1] * need[x[0]], 0) - cover[q].reduce((s, x) => s + x[1] * need[x[0]], 0))[0];
+      stops.push({ sid: +sid, items: cover[sid] });
+      cover[sid].forEach(([cn]) => left.delete(cn));
+    }
+    stops.forEach(s => s.items.forEach(([cn, p]) => { total += p * need[cn]; }));
+    document.getElementById('cost').textContent = fmt(total) + ' aUEC';
+    const sysTxt = prefs.sys === 'any' ? 'any system' : prefs.sys;
+    document.getElementById('routesub').textContent = names.length
+      ? `${stops.length} stop${stops.length === 1 ? '' : 's'} in ${sysTxt} covers ${sold.length} of ${names.length} new part${names.length === 1 ? '' : 's'}. Prices are each.`
+      : 'Your picks match the stock loadout, so there is nothing to buy.';
+    document.getElementById('stops').innerHTML = stops.map(s => {
+      const st = ST[s.sid];
+      return `<li class="stop"><div class="store">${esc(st[0])}</div>
+        <div class="loc"><b>${esc(st[1])}</b> · ${esc(st[2])} · ${esc(st[3])}</div>
+        ${s.items.map(([cn, p]) => {
+          const alts = storesFor(cn).filter(x => x.sid !== s.sid);
+          return `<div class="buy"><span>${need[cn] > 1 ? need[cn] + '× ' : ''}${esc(I[cn].n)} <span style="color:var(--muted)">S${I[cn].s}</span></span><span class="num">${fmt(p)}</span></div>
+          ${alts.length ? `<details class="alt"><summary>Also at ${alts.length} other store${alts.length > 1 ? 's' : ''}</summary><ul>${alts.slice(0, 30).map(x => `<li>${esc(x.s[0])}, ${esc(x.s[1])} (${esc(x.s[2])}, ${esc(x.s[3])}) · <span class="num">${fmt(x.p)}</span></li>`).join('')}</ul></details>` : ''}`;
+        }).join('')}</li>`;
+    }).join('');
+    document.getElementById('nostock').innerHTML = unsold.length
+      ? `<div class="nostock"><b>No store listing${prefs.sys !== 'any' ? ' in ' + esc(prefs.sys) : ''}:</b> ${unsold.map(cn => esc(I[cn].n)).join(', ')}. These are usually loot, crafted, or ship-stock only. Turn on “Only recommend parts sold in stores” to swap them for buyable picks.</div>`
+      : '';
+  }
+
+  // ---------- orchestration ----------
+  function recompute() {
+    picks = ship.slots.map((sl, i) => manual[i] || best(sl));
+    renderSheet(); renderStats(); renderRoute();
+  }
+  function setShip(s, keepManual) {
+    ship = s; if (!keepManual) manual = {};
+    document.getElementById('ship').value = s.n;
+    const guns = s.slots.filter(x => x.cat === 'gun').length;
+    document.getElementById('shipmeta').innerHTML = `<b>${esc(s.m)}</b> · ${esc(s.car)} · ${esc(s.role)} · ${guns} gun hardpoint${guns === 1 ? '' : 's'}`;
+    try { if (location.hash !== '#' + slug(s.cn)) history.replaceState(null, '', '#' + slug(s.cn)); } catch (e) {}
+    recompute();
+    renderProfile(); resetThread();
+  }
+  function syncControls() {
+    document.querySelectorAll('.seg').forEach(seg => seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(prefs[seg.dataset.key] === b.dataset.v))));
+    document.getElementById('noScatter').checked = prefs.noScatter;
+    document.getElementById('buyOnly').checked = prefs.buyOnly;
+    if (typeof syncPresets === 'function') syncPresets();
+  }
+
+  // ship list
+  const dl = document.getElementById('shiplist');
+  dl.innerHTML = S.map(s => `<option value="${esc(s.n)}">${esc(s.m)} · ${esc(s.role)}</option>`).join('');
+  const byName = n => S.find(s => s.n.toLowerCase() === n.trim().toLowerCase());
+  const inp = document.getElementById('ship');
+  inp.addEventListener('change', () => { const s = byName(inp.value) || S.find(s => s.n.toLowerCase().includes(inp.value.trim().toLowerCase())); if (s) setShip(s); else inp.value = ship.n; });
+  inp.addEventListener('input', () => { const s = byName(inp.value); if (s && s !== ship) setShip(s); });
+  inp.addEventListener('focus', () => inp.select());
+
+  document.querySelectorAll('.seg').forEach(seg => seg.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    prefs[seg.dataset.key] = b.dataset.v; save(); syncControls(); recompute();
+  }));
+  document.getElementById('noScatter').addEventListener('change', e => { prefs.noScatter = e.target.checked; save(); recompute(); });
+  document.getElementById('buyOnly').addEventListener('change', e => { prefs.buyOnly = e.target.checked; save(); recompute(); });
+  document.getElementById('sheet').addEventListener('change', e => {
+    const sel = e.target.closest('select[data-i]'); if (!sel) return;
+    const i = +sel.dataset.i; manual[i] = sel.value; recompute();
+    const again = document.getElementById('slot-' + i); if (again) again.focus();
+  });
+  document.getElementById('sheet').addEventListener('click', e => {
+    const b = e.target.closest('[data-reset]'); if (!b) return;
+    delete manual[+b.dataset.reset]; recompute();
+  });
+
+  // ---------- ship profile ----------
+  const pilotGuns = s => s.slots.filter(x => x.cat === 'gun' && !x.crew);
+  const crewGuns = s => s.slots.filter(x => x.cat === 'gun' && x.crew);
+  const stockBurst = list => list.reduce((a, x) => a + (I[x.st] ? I[x.st].b : 0), 0);
+  const METRICS = {
+    agility: s => (s.st.pitch + s.st.yaw) / 2,
+    speed: s => s.st.boost,
+    tough: s => s.st.hull + s.st.armor + s.st.shield,
+    fire: s => stockBurst(pilotGuns(s)),
+    stealth: s => -s.st.em,
+    profile: s => -s.st.cs,
+  };
+  function pct(s, key) {
+    const peers = S.filter(x => x.sz === s.sz && x.st && x.st.pitch > 0);
+    const pool = peers.length >= 6 ? peers : S.filter(x => x.st && x.st.pitch > 0);
+    const v = METRICS[key](s);
+    const below = pool.filter(x => METRICS[key](x) < v).length, same = pool.filter(x => METRICS[key](x) === v).length;
+    return Math.round((below + same / 2) / pool.length * 100);
+  }
+  const sizeName = sz => ({ 1: 'snub & size 1', 2: 'size 2 (light/medium)', 3: 'size 3 (medium)', 4: 'size 4 (large)', 5: 'size 5 (capital-class)', 6: 'size 6 (capital)' })[sz] || 'size ' + sz;
+  function profileOf(s) {
+    const st = s.st, P = {};
+    Object.keys(METRICS).forEach(k => { P[k] = pct(s, k); });
+    const pg = pilotGuns(s), cg = crewGuns(s);
+    const role = (s.role || '').toLowerCase(), car = (s.car || '').toLowerCase();
+    const good = [], bad = [];
+    let use, why, preset;
+    const industrial = /mining|salvage|refin|repair|medic|medical|refuel|tractor|construction|science|data|recovery/.test(role) || car === 'industrial';
+    const hauler = car === 'transporter' || car === 'transport' || (/freight|cargo|hauler/.test(role) && !/fighter|gunship|combat/.test(role));
+    const multi = car === 'multi-role' || car === 'starter';
+    if (industrial) { use = s.role; why = 'This is a work ship. Fit it to survive and escape, not to fight.'; preset = 'travel'; }
+    else if (hauler) { use = 'Cargo hauling'; why = `It carries ${fmt(st.cargo)} SCU. Fit it to survive interdictions and get away fast.`; preset = 'travel'; }
+    else if (car === 'exploration' || /pathfind|expedition|touring|luxury/.test(role)) { use = 'Exploration and touring'; why = `Fit it for fast quantum travel and tough shields${st.cargo >= 8 ? `, and use its ${fmt(st.cargo)} SCU for light hauling` : ''}.`; preset = 'travel'; }
+    else if (/stealth|bomber/.test(role) || P.stealth >= 85) { use = /bomber/.test(role) ? 'Stealth bombing runs' : 'Stealth and ambush'; why = 'Its signature is lower than most ships its size, so it works best striking before it\'s seen, then leaving. Don\'t turn-fight in it.'; preset = 'stealth'; }
+    else if (multi && st.cargo >= 16) { use = P.agility >= 55 ? 'Light hauling with real combat ability' : 'Light hauling and PvE missions'; why = `It mixes ${fmt(st.cargo)} SCU of cargo with ${pilotGuns(s).length} pilot guns, so it can run cargo and bounty work in the same trip.`; preset = P.agility >= 55 ? 'pvp' : 'pve'; }
+    else if (P.agility >= 65 && P.tough < 55) { use = 'Dogfighting and PvP'; why = 'It out-turns most ships its size but can\'t take much punishment, so it wins by staying on target and out of the line of fire.'; preset = 'pvp'; }
+    else if (P.tough >= 65 && P.agility < 50) { use = 'PvE bounty hunting and tanking'; why = 'It\'s tougher than most ships its size but turns slowly, so it shines in long fights against NPCs rather than turning duels with players.'; preset = 'pve'; }
+    else if (P.stealth >= 75) { use = 'Stealth and ambush'; why = 'Its signature is lower than most ships its size, so it can pick fights before it\'s seen.'; preset = 'stealth'; }
+    else if (P.fire >= 70) { use = 'Heavy-hitting bounty work'; why = 'It brings more stock firepower than most ships its size.'; preset = 'pve'; }
+    else if (car === 'combat' || car === 'multi-role' || car === 'competition') { use = P.agility >= 55 ? 'All-round combat, leaning PvP' : 'All-round combat, leaning PvE'; why = 'It doesn\'t stand out in one area, so play to the slight edge it has.'; preset = P.agility >= 55 ? 'pvp' : 'pve'; }
+    else { use = s.role || s.car; why = 'Fit it to survive and get where it\'s going.'; preset = 'travel'; }
+
+    const sz = sizeName(s.sz);
+    if (P.agility >= 70) good.push(`Turns quickly: ${st.pitch}°/${st.yaw}° pitch/yaw per second, faster than ${P.agility}% of ${sz} ships.`);
+    if (P.agility <= 30) bad.push(`Turns slowly: ${st.pitch}°/${st.yaw}° pitch/yaw per second, slower than ${100 - P.agility}% of ${sz} ships.`);
+    if (P.tough >= 70) good.push(`Very hard to kill: ${fmt(st.hull + st.armor)} hull and armor plus ${fmt(st.shield)} shield HP.`);
+    if (P.tough <= 30) bad.push(`Fragile: ${fmt(st.hull + st.armor)} hull and armor plus ${fmt(st.shield)} shield HP, less than most ${sz} ships.`);
+    if (P.speed >= 70) good.push(`Fast: ${st.boost} m/s boosted, quick to reposition or escape.`);
+    if (P.speed <= 25) bad.push(`Slow: ${st.boost} m/s boosted, hard to escape a fight.`);
+    if (pg.length && P.fire >= 70) good.push(`Strong pilot firepower: ${fmt(stockBurst(pg))} burst DPS stock from ${pg.length} gun${pg.length > 1 ? 's' : ''}.`);
+    if (pg.length && P.fire <= 25) bad.push(`Light pilot firepower: ${fmt(stockBurst(pg))} burst DPS stock.`);
+    if (P.stealth >= 70) good.push(`Low signature (${fmt(st.em)} EM), harder to detect than most ${sz} ships.`);
+    if (P.stealth <= 25) bad.push(`Loud signature (${fmt(st.em)} EM), easy to spot on radar.`);
+    if (P.profile <= 25) bad.push(`Big target: its largest profile (${fmt(st.cs)}) is bigger than most ${sz} ships.`);
+    if (P.profile >= 75) good.push('Small target, harder to hit than most ships its size.');
+    if (pg.length && st.wpip && st.wpip / pg.length < 0.75) bad.push(`Power-starved guns: ${st.wpip} weapon pip${st.wpip === 1 ? '' : 's'} for ${pg.length} pilot guns. Energy weapons drain fast; ballistics avoid this.`);
+    if (cg.length) {
+      const share = Math.round(stockBurst(cg) / Math.max(1, stockBurst(cg) + stockBurst(pg)) * 100);
+      (share >= 40 ? bad : good).push(`${cg.length} crew-turret gun${cg.length > 1 ? 's' : ''} (${share}% of stock firepower)${share >= 40 ? ', so it needs gunners to fight at full strength' : ' for extra coverage when you have crew'}.`);
+    }
+    if (st.cargo >= 8) good.push(`${fmt(st.cargo)} SCU of cargo space.`);
+    if (!pg.length && !cg.length) bad.push('No swappable guns, so avoid fights.');
+    if (!good.length) good.push('No standout strengths against ships its size.');
+    if (!bad.length) bad.push('No major weaknesses against ships its size.');
+    return { P, use, why, preset, good, bad };
+  }
+  function renderProfile() {
+    const pr = profileOf(ship);
+    document.getElementById('prof-lead').innerHTML = `Best for <b>${esc(pr.use)}</b>. ${esc(pr.why)}`;
+    const bars = [['Agility', 'agility'], ['Toughness', 'tough'], ['Speed', 'speed'], ['Firepower', 'fire'], ['Stealth', 'stealth']];
+    document.getElementById('prof-bars').innerHTML = bars.map(([l, k]) => {
+      const v = pr.P[k]; const c = v >= 70 ? 'hi' : v <= 30 ? 'lo' : '';
+      return `<div class="bar"><div class="lbl"><span>${l}</span><span class="num">${v}</span></div><div class="track"><div class="fill ${c}" style="width:${Math.max(3, v)}%"></div><div class="mid"></div></div></div>`;
+    }).join('') + `<div class="barnote">Percentile vs other ${esc(sizeName(ship.sz))} ships. Line marks average.</div>`;
+    document.getElementById('prof-good').innerHTML = pr.good.map(x => `<li>${esc(x)}</li>`).join('');
+    document.getElementById('prof-bad').innerHTML = pr.bad.map(x => `<li>${esc(x)}</li>`).join('');
+    const btn = document.getElementById('prof-apply');
+    btn.dataset.p = pr.preset;
+    syncSuggest();
+  }
+  function syncSuggest() {
+    const btn = document.getElementById('prof-apply'); if (!btn.dataset.p) return;
+    const on = activePreset() === btn.dataset.p;
+    btn.textContent = on ? `Using ${PRESETS[btn.dataset.p].name}` : `Use ${PRESETS[btn.dataset.p].name} loadout`;
+    btn.setAttribute('aria-pressed', String(on));
+  }
+  document.getElementById('prof-apply').addEventListener('click', e => {
+    const p = e.currentTarget.dataset.p; if (p && activePreset() !== p) applyPreset(p);
+  });
+
+  // ---------- ask Gemini (through this server) ----------
+  let thread = [], ctl = null;
+  const modelSel = document.getElementById('model'), switchedEl = document.getElementById('switched');
+  let modelList = [];
+  const STATUS_TXT = { daily: 'daily limit reached', busy: 'busy', unavailable: 'not available' };
+  const untilTxt = iso => { try { return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); } catch (e) { return ''; } };
+  function savedModel() { try { return localStorage.getItem('hp-model') || 'auto'; } catch (e) { return 'auto'; } }
+  function saveModel(v) { try { localStorage.setItem('hp-model', v); } catch (e) {} }
+  function renderModels(list, keep) {
+    modelList = list || [];
+    const want = keep || modelSel.value || savedModel();
+    const firstOk = modelList.find(m => m.status === 'ok');
+    modelSel.innerHTML = '<option value="auto">Auto (first available)</option>' + modelList.map(m => {
+      const extra = m.status === 'ok' ? '' : ` (${STATUS_TXT[m.status] || m.status}${m.until ? ' until ' + untilTxt(m.until) : ''})`;
+      return `<option value="${esc(m.id)}"${m.status !== 'ok' ? ' class="off"' : ''}>${esc(m.label)}${esc(extra)}</option>`;
+    }).join('');
+    let pick = want;
+    const chosen = modelList.find(m => m.id === want);
+    if (want !== 'auto' && (!chosen || chosen.status !== 'ok')) {
+      // the chosen model is full or gone: switch to the first available one
+      pick = firstOk ? firstOk.id : 'auto';
+      if (chosen && firstOk) switchedEl.textContent = `${chosen.label} is at its limit. Switched to ${firstOk.label}.`;
+    }
+    modelSel.value = modelList.some(m => m.id === pick) ? pick : 'auto';
+  }
+  async function loadModels() {
+    try {
+      const r = await fetch('api/models', { cache: 'no-store' }); const j = await r.json();
+      if (!j.enabled) { aiOff(); return; }
+      renderModels(j.models, modelList.length ? modelSel.value : savedModel());
+    } catch (e) { /* keep the dropdown as is */ }
+  }
+  function aiOff() {
+    document.getElementById('askform').hidden = true; document.getElementById('ask-chips').hidden = true;
+    modelSel.closest('.modelrow').hidden = true;
+    askhint.textContent = 'Questions are off. Add GEMINI_API_KEY in the container settings and restart it to turn them on.';
+  }
+  modelSel.addEventListener('change', () => { saveModel(modelSel.value); switchedEl.textContent = ''; });
+  const threadEl = document.getElementById('thread'), askq = document.getElementById('askq'), askbtn = document.getElementById('askbtn'), askhint = document.getElementById('askhint');
+  function shipBrief(s, withPicks) {
+    const st = s.st, pr = profileOf(s);
+    const lines = [
+      `${s.n} (${s.m}) · career ${s.car} · role ${s.role} · ship size ${s.sz} · crew ${st.crew}`,
+      `Flight: pitch ${st.pitch}°/s, yaw ${st.yaw}°/s, roll ${st.roll}°/s, main accel ${st.acc} m/s², SCM ${st.scm} m/s, boost ${st.boost} m/s, mass ${fmt(st.mass)} kg`,
+      `Durability: hull ${fmt(st.hull)}, armor ${fmt(st.armor)}, stock shields ${fmt(st.shield)} HP. Largest cross-section ${fmt(st.cs)}. EM ${fmt(st.em)}, IR ${fmt(st.ir)}. Cargo ${st.cargo} SCU.`,
+      `Power: ${st.gen} generation segments; weapon pips ${st.wpip} for ${pilotGuns(s).length} pilot guns. Quantum spool ${st.qspool}s.`,
+      `Percentile vs same-size ships: agility ${pr.P.agility}, toughness ${pr.P.tough}, speed ${pr.P.speed}, stock pilot firepower ${pr.P.fire}, stealth ${pr.P.stealth}. Profile verdict: ${pr.use}.`,
+      'Hardpoints (slot · size · stock part' + (withPicks ? ' → current pick' : '') + '):',
+    ];
+    s.slots.forEach((sl, i) => {
+      const stock = I[sl.st] ? I[sl.st].n : 'empty';
+      const pick = withPicks && picks[i] && picks[i] !== sl.st ? ` → ${I[picks[i]].n}` : '';
+      lines.push(`- ${sl.cat}${sl.crew ? ' (crew turret)' : ''} ${sl.grp} S${sl.s}${sl.ed ? '' : ' locked'}: ${stock}${pick}`);
+    });
+    return lines.join('\n');
+  }
+  function context(question) {
+    const other = findShip(question);
+    let ctx = `Patch ${D.ver} game data.\n\nSHIP IN APP:\n${shipBrief(ship, true)}`;
+    const p = activePreset();
+    ctx += `\n\nApp settings: preset ${p ? PRESETS[p].name : 'custom'}; weapon priority ${prefs.wp}; damage ${prefs.dt}; shields ${prefs.sh}; component class ${prefs.cls}; quantum ${prefs.qd}; shopping in ${prefs.sys}.`;
+    const t = stats(picks), a = stats(ship.slots.map(x => x.st));
+    ctx += `\nCurrent loadout totals (stock in brackets): pilot burst ${fmt(t.pb)} [${fmt(a.pb)}], sustained ${fmt(t.ps)} [${fmt(a.ps)}], shield HP ${fmt(t.hp)} [${fmt(a.hp)}], regen ${fmt(t.rg)}/s [${fmt(a.rg)}].`;
+    if (other && other !== ship) ctx += `\n\nOTHER SHIP MENTIONED:\n${shipBrief(other, false)}`;
+    return ctx;
+  }
+  function md(t) {
+    const out = []; let list = [];
+    const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    t.split('\n').forEach(line => {
+      const m = line.match(/^\s*[-*•]\s+(.*)/);
+      if (m) { list.push(`<li>${inline(m[1])}</li>`); return; }
+      if (list.length) { out.push(`<ul>${list.join('')}</ul>`); list = []; }
+      if (line.trim()) out.push(`<p>${inline(line.trim())}</p>`);
+    });
+    if (list.length) out.push(`<ul>${list.join('')}</ul>`);
+    return out.join('');
+  }
+  function renderChips() {
+    const n = ship.n.replace(/^(Aegis|Anvil|Drake|Origin|RSI|MISC|Crusader|Mirai|Esperia|Kruger|Argo|Gatac|Aopoa|Banu|C\.O\.|Consolidated Outland|Grey's|Tumbril|Greycat) /, '');
+    const qs = [`Is the ${n} good for PvP?`, 'What should I upgrade first?', `What's the ${n} best at?`];
+    const rivals = { 2: 'Gladius', 3: 'Cutlass Black', 4: 'Constellation Andromeda' };
+    if (rivals[ship.sz] && !ship.n.includes(rivals[ship.sz])) qs.push(`How does it compare to the ${rivals[ship.sz]}?`);
+    document.getElementById('ask-chips').innerHTML = qs.map(q => `<button type="button">${esc(q)}</button>`).join('');
+    document.getElementById('ask-ship').textContent = n;
+  }
+  document.getElementById('ask-chips').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b || ctl) return;
+    ask(b.textContent);
+  });
+  function setBusy(on) {
+    askbtn.textContent = on ? 'Stop' : 'Ask';
+    askbtn.classList.toggle('stop', on);
+  }
+  async function ask(q) {
+    q = q.trim(); if (!q) return;
+    const qEl = document.createElement('div'); qEl.className = 'q'; qEl.textContent = q;
+    const aEl = document.createElement('div'); aEl.className = 'a wait'; aEl.textContent = 'Checking the ship data…';
+    threadEl.append(qEl, aEl); threadEl.scrollTop = threadEl.scrollHeight;
+    askq.value = ''; switchedEl.textContent = '';
+    const requested = modelSel.value;
+    ctl = new AbortController(); setBusy(true);
+    let text = '', truncated = false, used = null, failed = null;
+    try {
+      const res = await fetch('api/ask', {
+        method: 'POST', signal: ctl.signal, headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q, context: context(q), history: thread.slice(-2), model: requested }),
+      });
+      if (!res.ok || !res.body) {
+        let j = {}; try { j = await res.json(); } catch (e) {}
+        throw { code: j.code || 'http_' + res.status, message: j.message || `The server answered ${res.status}.` };
+      }
+      const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = '';
+      for (;;) {
+        const { value, done } = await reader.read(); if (done) break;
+        buf += dec.decode(value, { stream: true });
+        let i;
+        while ((i = buf.indexOf('\n')) >= 0) {
+          const line = buf.slice(0, i); buf = buf.slice(i + 1);
+          if (!line.trim()) continue;
+          let ev; try { ev = JSON.parse(line); } catch (e) { continue; }
+          if (ev.type === 'model') {
+            used = ev;
+            if (requested !== 'auto' && ev.model !== requested) {
+              const was = (modelList.find(m => m.id === requested) || { label: requested }).label;
+              switchedEl.textContent = `${was} is at its limit. Switched to ${ev.label}.`;
+              modelSel.value = ev.model; // auto-select the model that's available
+            } else if (requested === 'auto') {
+              switchedEl.textContent = `Answered by ${ev.label}${ev.switchedFrom && ev.switchedFrom.length ? ` (${ev.switchedFrom.length} busier model${ev.switchedFrom.length > 1 ? 's' : ''} skipped)` : ''}.`;
+            }
+          } else if (ev.type === 'text') {
+            text += ev.text; aEl.className = 'a'; aEl.innerHTML = md(text); threadEl.scrollTop = threadEl.scrollHeight;
+          } else if (ev.type === 'done') truncated = !!ev.truncated;
+          else if (ev.type === 'error') failed = ev;
+          else if (ev.type === 'models') renderModels(ev.models, modelSel.value);
+        }
+      }
+      if (failed) throw failed;
+      aEl.className = 'a'; aEl.innerHTML = md(text) + (truncated ? '<p><i>The answer was cut short. Ask a narrower question for the rest.</i></p>' : '');
+      thread.push({ q, a: text });
+    } catch (e) {
+      if (e && e.name === 'AbortError') { if (text) { aEl.className = 'a'; aEl.innerHTML = md(text) + '<p><i>Stopped.</i></p>'; } else aEl.remove(); }
+      else if (e && e.code === 'no_key') { aEl.remove(); qEl.remove(); aiOff(); }
+      else { aEl.className = 'a err'; aEl.innerHTML = (text ? md(text) : '') + `<p>${esc((e && e.message) || 'The answer was interrupted. Ask again to retry.')}</p>`; loadModels(); }
+    } finally { ctl = null; setBusy(false); }
+  }
+  document.getElementById('askform').addEventListener('submit', e => {
+    e.preventDefault();
+    if (ctl) { ctl.abort(); return; }
+    ask(askq.value);
+  });
+  function resetThread() {
+    if (ctl) ctl.abort();
+    thread = []; threadEl.innerHTML = ''; renderChips();
+  }
+
+  // ---------- presets ----------
+  const PRESETS = {
+    // NPC fights run long: sustained damage, energy (no ammo to run dry), max shield HP to tank
+    pve: { name: 'Best PvE', wp: 'sustained', dt: 'Energy', noScatter: true, sh: 'hp', cls: 'Military', qd: 'speed' },
+    // player fights are short: burst damage, any type, shields that come back fast, quick spool to escape
+    pvp: { name: 'Best PvP', wp: 'burst', dt: 'any', noScatter: true, sh: 'regen', cls: 'Military', qd: 'spool' },
+    stealth: { name: 'Stealth', wp: 'alpha', dt: 'any', noScatter: true, sh: 'balanced', cls: 'Stealth', qd: 'spool' },
+    travel: { name: 'Travel', wp: 'range', dt: 'any', noScatter: true, sh: 'hp', cls: 'any', qd: 'speed' },
+  };
+  const PKEYS = ['wp', 'dt', 'noScatter', 'sh', 'cls', 'qd'];
+  function activePreset() {
+    return Object.keys(PRESETS).find(k => PKEYS.every(f => PRESETS[k][f] === prefs[f])) || null;
+  }
+  function syncPresets() {
+    const a = activePreset();
+    document.querySelectorAll('#prebtns button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.p === a)));
+    syncSuggest();
+  }
+  function applyPreset(k) {
+    PKEYS.forEach(f => { prefs[f] = PRESETS[k][f]; });
+    manual = {}; save(); syncControls(); recompute();
+  }
+  document.getElementById('prebtns').addEventListener('click', e => {
+    const b = e.target.closest('button[data-p]'); if (!b) return;
+    applyPreset(b.dataset.p);
+    setMsg(`${PRESETS[b.dataset.p].name} loadout for the ${ship.n}.`, 'ok');
+  });
+
+  // ---------- typed / dictated commands ----------
+  const norm = s => s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const msgEl = document.getElementById('cmdmsg');
+  function setMsg(t, cls) { msgEl.textContent = t; msgEl.className = 'cmdmsg' + (cls ? ' ' + cls : ''); }
+  const STOP = new Set(['best', 'loadout', 'load', 'out', 'for', 'the', 'my', 'a', 'an', 'in', 'on', 'give', 'me', 'build', 'show', 'make', 'setup', 'set', 'up', 'fit', 'pve', 'pvp', 'stealth', 'travel', 'stanton', 'pyro', 'nyx', 'buy', 'shop', 'only', 'with', 'and', 'please', 'what', 's', 'is', 'to', 'of', 'mk', 'ship']);
+  function findShip(q) {
+    const words = norm(q).split(' ').filter(w => w && !STOP.has(w));
+    if (!words.length) return null;
+    let bestS = null, bestScore = 0;
+    S.forEach(s => {
+      const hay = ' ' + norm(s.n + ' ' + s.m) + ' ';
+      let sc = 0;
+      words.forEach(w => { if (hay.includes(' ' + w + ' ')) sc += 3; else if (hay.includes(w)) sc += 1; });
+      sc -= norm(s.n).split(' ').length * 0.05; // prefer the base model over long variant names
+      if (sc > bestScore) { bestScore = sc; bestS = s; }
+    });
+    return bestScore >= 1 ? bestS : null;
+  }
+  function runCommand(text) {
+    const q = norm(text);
+    if (!q) { setMsg('Type something like “best PvP loadout for the Gladius”.', 'err'); return; }
+    let preset = null;
+    if (/\bpve\b|\bp v e\b|\bnpc|bount|mission|merc/.test(q)) preset = 'pve';
+    else if (/\bpvp\b|\bp v p\b|dogfight|player|arena/.test(q)) preset = 'pvp';
+    else if (/stealth|sneak|quiet|low sig/.test(q)) preset = 'stealth';
+    else if (/travel|explor|haul|cargo|fast quantum/.test(q)) preset = 'travel';
+    const sys = /\bpyro\b/.test(q) ? 'Pyro' : /\bnyx\b/.test(q) ? 'Nyx' : /\bstanton\b/.test(q) ? 'Stanton' : null;
+    const s = findShip(q);
+    if (!preset && !s) { setMsg('I didn’t catch a goal or a ship. Try “best PvE loadout for the Cutlass Black”.', 'err'); return; }
+    if (sys) prefs.sys = sys;
+    if (s && s !== ship) setShip(s);
+    if (preset) applyPreset(preset); else { save(); syncControls(); recompute(); }
+    const p = activePreset();
+    setMsg(`${p ? PRESETS[p].name : 'Custom'} loadout for the ${ship.n}${prefs.sys !== 'any' ? ', shopping in ' + prefs.sys : ''}.`, 'ok');
+  }
+  document.getElementById('cmdform').addEventListener('submit', e => { e.preventDefault(); runCommand(document.getElementById('cmd').value); });
+
+  function fromHash() {
+    const h = location.hash.slice(1);
+    return h && S.find(s => slug(s.cn) === h);
+  }
+  window.addEventListener('hashchange', () => { const s = fromHash(); if (s && s !== ship) setShip(s); });
+
+  syncControls();
+  setShip(fromHash() || S.find(s => s.n === 'Aegis Gladius') || S[0]);
+  if (CFG.ai === false) aiOff(); else loadModels();
+})();
+</script>
+</body>
+</html>
