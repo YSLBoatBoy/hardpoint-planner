@@ -3,9 +3,11 @@
 A self-hosted Star Citizen loadout optimizer for Unraid (or any Docker host).
 
 - **Best loadout for any ship**: picks weapons, shields, power plants, coolers and quantum drives for your goal (PvE, PvP, stealth, travel), with per-slot overrides.
-- **Where to buy it**: the fewest store stops to buy every part, with the store, place, planet or moon, and star system.
+- **Compare any part**: every slot (weapons, shields, power plants, coolers, quantum drives) opens a sortable comparison table with that part type's own stats, price and nearest store, with search and an "in stores only" filter.
+- **Where to buy it**: the fewest store stops to buy every part, with the store, place, planet or moon, star system, each part's type and key stat, and a subtotal per stop.
 - **Ship profile**: what each ship is best at and its strengths and weaknesses, rated against ships of the same size.
 - **Your Fleet**: add the ships you own, give them nicknames, pick their liveries, fit their parts (or fill with a PvE/PvP/Stealth/Travel preset), and see full stats: burst/sustained/alpha DPS, damage mix, shield HP and regen, quantum speed and travel times, power, cooling, flight performance, cargo and signature. Saved on the server in `/data/fleet.json`, so it's the same on every device.
+- **Fleet advisor**: pick an activity (bounty hunting, PvP, cargo, mining, salvage, exploration, rescue, stealth, ground ops, escort, racing, making money) and whether you play solo, with friends or with an org; Gemini answers with the best ship you own for it, how to fit it, and what to get next.
 - **Ask**: a general question tab ("which of my ships is best for bounty hunting?", "what should I buy next?") that knows every ship's stats and your fleet with its fitted parts. Each ship in the Planner also has its own question box. Answered by Google Gemini; if a model hits its free limit, the app switches to the next available one automatically, and you can pick a model from a dropdown.
 - **Stays current**: refreshes game data and store prices on a schedule.
 

@@ -97,6 +97,8 @@ function cleanFleet(f) {
 
 const SYSTEM_GENERAL = 'You are a Star Citizen ship advisor inside a self-hosted fleet and loadout app. The user message contains the player\'s fleet (with their chosen parts), a stat table of every flyable ship from the game files, and full details for any ship the question names. Use that data as the source of truth and cite its numbers. When the player asks which ship to use, recommend from THEIR fleet first, then mention a better ship they don\'t own only if it is clearly better. Your own Star Citizen knowledge may be out of date: when an answer depends on things not in the data (how a ship feels to fly, the current meta, prices to buy ships, recent or upcoming changes), say so briefly. Answer directly in under 220 words. Plain text only: short paragraphs or lines starting with "- ", **bold** for key terms, no headings, no tables.';
 
+const SYSTEM_FLEET = 'You are a Star Citizen fleet advisor inside a self-hosted fleet and loadout app. The user message says how the player plays (solo or with a group), then lists their fleet with fitted parts, a stat table of every flyable ship, and full details for ships the question names. Use that data as the source of truth and cite its numbers. For an activity: 1) name the best ship they own for it and why; if none of their ships can really do it (for example mining or salvage need a ship with that role), say so plainly; 2) say how to fit that ship for it, slot by slot in short form (which slots to change and to what kind of part, naming parts from the data where you can); 3) suggest at most two ships they don\'t own that would do it better, from the stat table, and say how much crew each needs. Respect their crew size: don\'t recommend ships that need more crew than they have unless you say why. Your own Star Citizen knowledge may be out of date: when an answer depends on things not in the data (in-game prices, the current meta, mission payouts, how a ship feels to fly), say so briefly. Answer in under 240 words. Plain text only: short paragraphs or lines starting with "- ", **bold** for ship and part names, no headings, no tables.';
+
 const SYSTEM = 'You are a Star Citizen ship-fitting advisor inside a self-hosted loadout planner app. Use the game data in the user message as the source of truth and cite its numbers. Your own Star Citizen knowledge may be out of date: when an answer depends on things not in the data (how a ship feels to fly, the current meta, recent or upcoming changes), say so briefly. Answer the question directly in under 170 words. Plain text only: short paragraphs or lines starting with "- ", **bold** for key terms, no headings, no tables.';
 
 async function handleAsk(req, res) {
@@ -105,7 +107,8 @@ async function handleAsk(req, res) {
   let body;
   try { body = JSON.parse(await readBody(req, 200 * 1024)); } catch (e) { return send(res, 400, { code: 'bad_request', message: 'Could not read the question.' }); }
   const question = String(body.question || '').slice(0, 2000).trim();
-  const general = body.mode === 'general';
+  const mode = ['general', 'fleet'].includes(body.mode) ? body.mode : 'ship';
+  const general = mode !== 'ship';
   const context = String(body.context || '').slice(0, general ? 140000 : 60000);
   if (!question) return send(res, 400, { code: 'bad_request', message: 'Type a question first.' });
   const history = Array.isArray(body.history) ? body.history.slice(-4) : [];
@@ -122,7 +125,7 @@ async function handleAsk(req, res) {
   res.writeHead(200, { 'Content-Type': 'application/x-ndjson; charset=utf-8', 'Cache-Control': 'no-store', 'X-Accel-Buffering': 'no' });
   const emit = ev => { if (!res.writableEnded) res.write(JSON.stringify(ev) + '\n'); };
   try {
-    await gemini.ask({ system: general ? SYSTEM_GENERAL : SYSTEM, contents, model: String(body.model || 'auto'), signal: ctl.signal, emit });
+    await gemini.ask({ system: mode === 'fleet' ? SYSTEM_FLEET : mode === 'general' ? SYSTEM_GENERAL : SYSTEM, contents, model: String(body.model || 'auto'), signal: ctl.signal, emit });
   } catch (e) {
     if (ctl.signal.aborted) return;
     emit({ type: 'error', code: e.code || 'upstream_error', message: e.message || 'Something went wrong asking Gemini. Try again.' });

@@ -24,6 +24,7 @@
   --ballistic: #8a5d00;
   --distortion: #7348b8;
   --good: #1b7543;
+  --mil: #6b5a1e;
   --bad: #b3261e;
   --shadow: 0 1px 2px rgba(22,33,43,.06), 0 4px 16px rgba(22,33,43,.05);
   --f-display: "Saira Condensed", "Arial Narrow", system-ui, sans-serif;
@@ -34,7 +35,7 @@
   :root:not([data-theme="light"]) {
     --bg: #0d1318; --panel: #141c23; --panel-2: #10171d; --ink: #e1e8ee; --muted: #8e9ba7; --line: #25303a;
     --accent: #f0a03c; --accent-soft: #3a2a14; --accent-ink: #1a1206;
-    --energy: #62b4ff; --ballistic: #e0b24e; --distortion: #b993ff; --good: #4fc58c; --bad: #ff8073;
+    --energy: #62b4ff; --ballistic: #e0b24e; --distortion: #b993ff; --good: #4fc58c; --bad: #ff8073; --mil: #d6c27a;
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
     color-scheme: dark;
   }
@@ -42,7 +43,7 @@
 :root[data-theme="dark"] {
   --bg: #0d1318; --panel: #141c23; --panel-2: #10171d; --ink: #e1e8ee; --muted: #8e9ba7; --line: #25303a;
   --accent: #f0a03c; --accent-soft: #3a2a14; --accent-ink: #1a1206;
-  --energy: #62b4ff; --ballistic: #e0b24e; --distortion: #b993ff; --good: #4fc58c; --bad: #ff8073;
+  --energy: #62b4ff; --ballistic: #e0b24e; --distortion: #b993ff; --good: #4fc58c; --bad: #ff8073; --mil: #d6c27a;
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
   color-scheme: dark;
 }
@@ -94,8 +95,136 @@ header.top h1 span { color: var(--accent); }
 @media (max-width: 980px) { .presets { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 560px) { .prebtns { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
+/* icons, chips, meters */
+.ico { display: inline-flex; width: 16px; height: 16px; flex: none; color: var(--muted); }
+.ico svg { width: 100%; height: 100%; }
+.chip { display: inline-block; font: 500 11.5px/1 var(--f-body); padding: 4px 6px; border-radius: 3px; border: 1px solid var(--line); background: var(--panel-2); color: var(--muted); white-space: nowrap; }
+.c-Military { color: var(--mil); border-color: currentColor; } .c-Stealth { color: var(--distortion); border-color: currentColor; }
+.c-Industrial { color: var(--ballistic); border-color: currentColor; } .c-Competition { color: var(--energy); border-color: currentColor; }
+.grade { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 3px; font: 700 12px/1 var(--f-mono); color: var(--panel); background: var(--muted); flex: none; }
+.g-A { background: var(--good); } .g-B { background: var(--energy); } .g-C { background: var(--ballistic); } .g-D { background: var(--muted); }
+.muted { color: var(--muted); }
+.mtrs { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 6px 16px; }
+.mtr .mk { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; }
+.mtr .mk b { font: 500 13px var(--f-mono); color: var(--ink); text-transform: none; letter-spacing: 0; white-space: nowrap; }
+.mtr .mk small { color: var(--muted); font-size: 11px; }
+.mbar { height: 4px; background: var(--line); border-radius: 2px; margin-top: 3px; overflow: hidden; }
+.mbar i { display: block; height: 100%; background: var(--ink); border-radius: 2px; }
+
+/* slot rows + part card */
+.slot-main { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.part {
+  width: 100%; text-align: left; font: inherit; color: var(--ink); background: var(--panel-2); border: 1px solid var(--line);
+  border-left: 3px solid var(--line); border-radius: 6px; padding: 9px 11px; cursor: pointer; display: grid; gap: 8px;
+}
+.part:hover:not(:disabled) { border-color: var(--muted); }
+.part:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.part:disabled { cursor: default; }
+.slot.changed .part { border-left-color: var(--accent); }
+.slot.changed .mbar i { background: var(--accent); }
+.slot.open .part { border-color: var(--accent); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.part-top { display: flex; align-items: center; gap: 6px 9px; flex-wrap: wrap; min-width: 0; }
+.part-top .ico { color: var(--ink); }
+.pname { font: 600 16px/1.2 var(--f-body); min-width: 0; overflow-wrap: anywhere; }
+.pname small { font: 500 12px var(--f-mono); color: var(--muted); }
+.pchips { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.pchange { margin-left: auto; font: 700 12px/1 var(--f-display); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.where .wk { font: 700 11px var(--f-display); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-right: 3px; }
+.where b { font-weight: 600; }
+.where .more { color: var(--muted); }
+
+/* picker */
+.picker { min-width: 0; border: 1px solid var(--accent); border-top: 0; border-radius: 0 0 6px 6px; background: var(--panel); margin-top: -7px; }
+.pbar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 10px 10px 8px; border-bottom: 1px solid var(--line); }
+.pbar input[type="search"] { flex: 1 1 200px; min-width: 0; font: 500 14px var(--f-body); color: var(--ink); background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 6px 9px; }
+.pbar input[type="search"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.pbar .check { margin: 0; font-size: 13px; }
+.phint { flex-basis: 100%; font-size: 12px; color: var(--muted); }
+.ptable-wrap { overflow: auto; max-height: 440px; }
+.ptable { border-collapse: collapse; width: 100%; min-width: 780px; font-size: 13.5px; }
+.ptable thead th { position: sticky; top: 0; z-index: 1; background: var(--panel); border-bottom: 1px solid var(--line); padding: 0; text-align: right; font: 600 11px var(--f-display); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.ptable thead th.tl { text-align: left; }
+.ptable thead th button { display: block; width: 100%; background: none; border: 0; padding: 8px; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; text-align: inherit; cursor: pointer; }
+.ptable thead th button:hover { color: var(--ink); }
+.ptable thead th button[aria-sort="ascending"], .ptable thead th button[aria-sort="descending"] { color: var(--accent); }
+.ptable thead th button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ptable thead th small { text-transform: none; letter-spacing: 0; }
+.ptable td, .ptable tbody th { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: middle; }
+.ptable tbody th { text-align: left; font-weight: 400; min-width: 150px; }
+.ptable tbody tr:hover { background: var(--panel-2); }
+.ptable tr.cur { background: var(--accent-soft); }
+.tname { display: block; font-weight: 600; }
+.tname small { font: 500 11.5px var(--f-mono); color: var(--muted); }
+.tsub { display: block; font-size: 12px; color: var(--muted); }
+.tchips { text-align: left !important; white-space: nowrap; }
+.tchips > * + * { margin-left: 4px; }
+.tv { display: block; }
+.tbar { display: block; height: 3px; min-width: 46px; background: var(--line); border-radius: 2px; margin-top: 3px; overflow: hidden; }
+.tbar i { display: block; height: 100%; background: var(--muted); }
+tr.cur .tbar i { background: var(--accent); }
+.tprice { font-weight: 600; }
+.twhere { text-align: left !important; white-space: nowrap; }
+.pempty { text-align: center !important; color: var(--muted); padding: 18px !important; }
+.fit { font: 600 12.5px var(--f-body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 5px 10px; cursor: pointer; }
+.fit:hover { border-color: var(--accent); }
+.fit:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.fit[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.sarr { margin-left: 3px; }
+
+/* route */
+.stop-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.stop-sum { text-align: right; flex: none; }
+.stop-sum b { display: block; font: 600 16px var(--f-mono); }
+.stop-sum span { font-size: 12px; color: var(--muted); }
+.stop .loc { margin-bottom: 4px; }
+.sys { font-weight: 600; color: var(--ink); }
+.buy { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 4px 10px; align-items: start; padding: 8px 0; border-top: 1px dotted var(--line); font-size: 14px; }
+.buy .ico { margin-top: 2px; color: var(--ink); }
+.buy-main { min-width: 0; }
+.buy-n { font-weight: 600; overflow-wrap: anywhere; }
+.buy-n .muted { font-weight: 400; font-size: 12.5px; }
+.qty { font: 600 13px var(--f-mono); color: var(--accent); margin-right: 4px; }
+.buy-c { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-top: 5px; }
+.kstat { font: 400 12.5px var(--f-mono); color: var(--ink); }
+.buy-p { font: 600 14px var(--f-mono); text-align: right; white-space: nowrap; }
+.buy-p small { display: block; font: 400 11px var(--f-body); color: var(--muted); }
+.nostock ul { list-style: none; margin: 6px 0; padding: 0; display: grid; gap: 4px; }
+.nostock li { display: flex; align-items: center; gap: 7px; color: var(--ink); }
+.nostock p { margin: 6px 0 0; }
+
+/* readout bars */
+.sbar { position: relative; height: 5px; background: var(--line); border-radius: 3px; margin: 6px 0 4px; }
+.sbar i { position: absolute; inset: 0 auto 0 0; background: var(--ink); border-radius: 3px; }
+.sbar.up i { background: var(--good); } .sbar.down i { background: var(--bad); }
+.sbar b { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--muted); }
+
+/* ship meta chips */
+.metachips { display: flex; flex-wrap: wrap; gap: 6px; }
+.mchip { font-size: 13px; padding: 4px 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--muted); white-space: nowrap; }
+.mchip b { color: var(--ink); font-weight: 600; }
+
+/* fleet advisor */
+.advisor { padding: 16px 18px; }
+.adv-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 10px 24px; }
+.adv-head h2 { font-size: 24px; text-transform: uppercase; letter-spacing: .04em; }
+.crewctl > span { display: block; font: 600 12px var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+.acts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 14px 0 4px; }
+.acts button {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 8px; align-items: center; text-align: left;
+  font: inherit; color: var(--ink); background: var(--panel-2); border: 1.5px solid var(--line); border-radius: 6px; padding: 9px 10px; cursor: pointer;
+}
+.acts button:hover:not(:disabled) { border-color: var(--accent); }
+.acts button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.acts button:disabled { opacity: .55; cursor: default; }
+.acts button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.acts .ico { grid-row: span 2; width: 18px; height: 18px; color: var(--accent); }
+.acts b { font: 700 15px/1.1 var(--f-display); letter-spacing: .03em; text-transform: uppercase; }
+.acts small { font-size: 12px; color: var(--muted); grid-column: 2; }
+.advisor .thread { margin-top: 10px; }
+
 /* tabs */
-.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-top: -8px; overflow-x: auto; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-top: -8px; overflow-x: auto; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; background: var(--bg); }
 .tabs button {
   font: 700 17px/1 var(--f-display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
   background: none; border: 0; border-bottom: 3px solid transparent; padding: 12px 14px 10px; cursor: pointer; white-space: nowrap;
@@ -104,7 +233,7 @@ header.top h1 span { color: var(--accent); }
 .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
 .tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .tabs .count { font: 500 12px var(--f-mono); background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px; margin-left: 4px; vertical-align: 2px; color: var(--ink); }
-.view { display: grid; gap: 20px; }
+.view { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
 @media (max-width: 460px) { .tabs button { font-size: 15px; padding: 11px 9px 9px; letter-spacing: .05em; } }
 
 /* fleet */
@@ -266,8 +395,12 @@ header.top h1 span { color: var(--accent); }
 .sheet { padding: 4px 0 8px; }
 .grp { padding: 14px 18px 4px; }
 .grp + .grp { border-top: 1px dashed var(--line); }
-.grp h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; }
+.grp h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.grp h2 .ico { color: var(--accent); }
 .grp h2 .num { font-size: 12px; letter-spacing: 0; font-weight: 400; }
+.grp h2 .gsum { margin-left: auto; text-align: right; }
+.fdetail .grp { padding: 10px 0 4px; }
+.fdetail .grp + .grp { border-top: 1px dashed var(--line); }
 .slot { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 4px 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .slot:last-child { border-bottom: 0; }
 .sz {
@@ -317,9 +450,7 @@ header.top h1 span { color: var(--accent); }
 .stop .store { font: 700 17px/1.15 var(--f-display); letter-spacing: .02em; }
 .stop .loc { font-size: 13px; color: var(--muted); margin: 2px 0 6px; }
 .stop .loc b { color: var(--ink); font-weight: 600; }
-.buy { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; padding: 3px 0; border-top: 1px dotted var(--line); }
-.buy:first-of-type { border-top: 0; }
-.buy .num { white-space: nowrap; }
+
 details.alt { margin-top: 6px; font-size: 13px; color: var(--muted); }
 details.alt summary { cursor: pointer; }
 details.alt ul { margin: 6px 0 0; padding-left: 18px; }
@@ -483,6 +614,35 @@ footer.notes a { color: inherit; }
   </div><!-- /view-planner -->
 
   <div class="view" id="view-fleet" role="tabpanel" aria-labelledby="tab-fleet" hidden>
+    <section class="panel ask advisor" id="chat-fleet" aria-labelledby="adv-h">
+      <div class="adv-head">
+        <div>
+          <span class="eyebrow">Fleet advisor</span>
+          <h2 id="adv-h">What should I fly for…</h2>
+          <p class="gsub" id="adv-sub">Pick an activity. You'll get the best ship you own for it, how to fit it, and what to get next.</p>
+        </div>
+        <div class="ctl crewctl"><span>Playing</span>
+          <div class="seg" id="crewseg" role="group" aria-label="Crew size">
+            <button type="button" data-crew="solo" aria-pressed="true">Solo</button><button type="button" data-crew="small">2–4 friends</button><button type="button" data-crew="org">Org fleet</button>
+          </div>
+        </div>
+      </div>
+      <div class="acts" id="acts" role="group" aria-label="Activities"></div>
+      <div class="chips" hidden></div>
+      <div class="thread" aria-live="polite"></div>
+      <form class="askrow">
+        <label for="fask" class="sr">Ask about your fleet</label>
+        <input id="fask" autocomplete="off" placeholder="Or ask anything: which of my ships should I take for Pyro bunker missions?">
+        <button class="btn go" type="submit">Ask</button>
+      </form>
+      <div class="modelrow">
+        <label for="fmodel">Model</label>
+        <select id="fmodel" class="model"><option value="auto">Auto (first available)</option></select>
+        <span class="switched" role="status" aria-live="polite"></span>
+        <button class="linkbtn" type="button" data-clear>Clear</button>
+      </div>
+      <p class="askhint">Uses your fleet with its fitted parts and every ship's stats.</p>
+    </section>
     <div class="fleet">
       <aside class="panel hangar">
         <h2>Hangar</h2>
@@ -662,64 +822,210 @@ footer.notes a { color: inherit; }
     ['cooler', 'Coolers', sl => sl.cat === 'cooler'],
     ['qd', 'Quantum drive', sl => sl.cat === 'qd'],
   ];
-  function itemStat(cn) {
-    const it = I[cn]; if (!it) return '';
+  // ---------- part presentation (shared by every slot type) ----------
+  const ICON = {
+    gun: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1v4M8 11v4M1 8h4M11 8h4" stroke="currentColor" stroke-width="1.5"/></svg>',
+    shield: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 13.5 3.5v4.2c0 3.2-2.3 5.6-5.5 6.8-3.2-1.2-5.5-3.6-5.5-6.8V3.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
+    power: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 1 3.5 9h4l-1 6 6-8h-4z" fill="currentColor"/></svg>',
+    cooler: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1v14M2 4.5l12 7M2 11.5l12-7M6 2.5 8 4l2-1.5M6 13.5 8 12l2 1.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+    qd: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3l5 5-5 5M8 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  };
+  const CAT_NAME = { gun: 'Weapon', shield: 'Shield', power: 'Power plant', cooler: 'Cooler', qd: 'Quantum drive' };
+  const icon = cat => `<span class="ico ico-${cat}">${ICON[cat] || ''}</span>`;
+  // metric definitions per part type: key, label, unit, which direction is better, decimals
+  const PMETRICS = {
+    gun: [['b', 'Burst', 'DPS', 'hi'], ['su', 'Sustained', 'DPS', 'hi'], ['a', 'Alpha', 'dmg', 'hi'], ['rg', 'Range', 'm', 'hi'], ['v', 'Speed', 'm/s', 'hi']],
+    shield: [['hp', 'HP', '', 'hi'], ['rg', 'Regen', '/s', 'hi'], ['dmd', 'Regen delay', 's', 'lo', 2], ['dd', 'Down delay', 's', 'lo', 2], ['em', 'EM', '', 'lo']],
+    power: [['out', 'Output', '', 'hi'], ['em', 'EM', '', 'lo']],
+    cooler: [['out', 'Coolant', '', 'hi'], ['ir', 'IR', '', 'lo'], ['em', 'EM', '', 'lo']],
+    qd: [['sp', 'Speed', 'km/s', 'hi'], ['spool', 'Spool', 's', 'lo', 1], ['cd', 'Cooldown', 's', 'lo', 1], ['fuel', 'Fuel use', '', 'lo', 2]],
+  };
+  const CARD_PMETRICS = { gun: 4, shield: 3, power: 2, cooler: 2, qd: 3 };
+  const numTxt = (v, d) => d ? (+v).toFixed(d).replace(/\.?0+$/, '') : fmt(v);
+  const rangeCache = {};
+  function metricRange(cat, size, key) {
+    const id = cat + size + key;
+    if (!rangeCache[id]) {
+      const vals = Object.values(I).filter(it => it.cat === cat && it.s === size && it[key] > 0).map(it => it[key]);
+      rangeCache[id] = vals.length ? [Math.min(...vals), Math.max(...vals)] : [0, 1];
+    }
+    return rangeCache[id];
+  }
+  function meterPct(it, m) {
+    const v = it[m[0]]; if (!(v > 0)) return 0;
+    const [lo, hi] = metricRange(it.cat, it.s, m[0]);
+    return Math.max(4, Math.min(100, Math.round((m[3] === 'hi' ? v / hi : lo / v) * 100)));
+  }
+  function chips(it) {
+    if (it.cat === 'gun') return `<span class="tag t-${esc(it.dt)}">${esc(it.dt)}</span><span class="chip">${esc(it.k || 'Gun')}</span>`;
+    return `<span class="grade g-${esc(it.g)}" title="Grade ${esc(it.g)}">${esc(it.g)}</span><span class="chip c-${esc(it.c || 'none')}">${esc(it.c || 'Unknown class')}</span>`;
+  }
+  function meters(it, n) {
+    return (PMETRICS[it.cat] || []).slice(0, n).map(m => `<div class="mtr" title="${m[3] === 'hi' ? 'Higher' : 'Lower'} is better · bar compares against every size ${it.s} ${esc(CAT_NAME[it.cat].toLowerCase())}">
+      <div class="mk"><span>${m[1]}</span><b class="num">${numTxt(it[m[0]], m[4])}${m[2] ? `<small> ${m[2]}</small>` : ''}</b></div>
+      <div class="mbar"><i style="width:${meterPct(it, m)}%"></i></div></div>`).join('');
+  }
+  function keyStat(it) {
     switch (it.cat) {
-      case 'gun': return `<span class="tag t-${it.dt}">${esc(it.dt)}</span><span>${esc(it.k || 'Gun')}</span><span><span class="num">${fmt(it.b)}</span> burst</span><span><span class="num">${fmt(it.su)}</span> sustained</span><span><span class="num">${fmt(it.a)}</span> alpha</span><span><span class="num">${fmt(it.rg)}</span> m</span>`;
-      case 'shield': return `<span>Grade ${it.g} · ${esc(it.c)}</span><span><span class="num">${fmt(it.hp)}</span> HP</span><span><span class="num">${fmt(it.rg)}</span> regen/s</span>`;
-      case 'power': return `<span>Grade ${it.g} · ${esc(it.c)}</span><span><span class="num">${fmt(it.out)}</span> power</span><span>EM <span class="num">${fmt(it.em)}</span></span>`;
-      case 'cooler': return `<span>Grade ${it.g} · ${esc(it.c)}</span><span><span class="num">${fmt(it.out)}</span> coolant</span><span>IR <span class="num">${fmt(it.ir)}</span></span>`;
-      case 'qd': return `<span>Grade ${it.g} · ${esc(it.c)}</span><span><span class="num">${fmt(it.sp)}</span> km/s</span><span>spool <span class="num">${it.spool}</span> s</span>`;
+      case 'gun': return `${fmt(it.b)} burst DPS`;
+      case 'shield': return `${fmt(it.hp)} HP · ${fmt(it.rg)}/s`;
+      case 'power': return `${fmt(it.out)} power`;
+      case 'cooler': return `${fmt(it.out)} coolant`;
+      case 'qd': return `${fmt(it.sp)} km/s`;
     }
     return '';
   }
-  function optLabel(cn, slot) {
-    const it = I[cn];
-    let key = '';
-    if (it.cat === 'gun') key = `${fmt(it.b)} burst · ${it.dt}`;
-    else if (it.cat === 'shield') key = `${fmt(it.hp)} HP · ${fmt(it.rg)}/s · ${it.g}`;
-    else if (it.cat === 'power' || it.cat === 'cooler') key = `${fmt(it.out)} · ${it.g} ${it.c}`;
-    else if (it.cat === 'qd') key = `${fmt(it.sp)} km/s · ${it.g}`;
-    const p = cheapest(cn);
-    const sz = it.cat === 'gun' && it.s !== slot.s ? ` (S${it.s})` : '';
-    return `${it.n}${sz} — ${key} — ${p ? fmt(p) + ' aUEC' : 'not in stores'}${cn === slot.st ? ' · stock' : ''}`;
-  }
+  function itemStat(cn) { const it = I[cn]; return it ? `${chips(it)}<span>${esc(keyStat(it))}</span>` : ''; }
   function whereText(cn, slot) {
-    if (cn === slot.st) return '<span class="where none">Stock part</span>';
+    if (slot && cn === slot.st) return '<span class="where none">Stock part, comes with the ship</span>';
     const l = storesFor(cn);
-    if (!l.length) return '<span class="where none">No store listing</span>';
+    if (!l.length) return `<span class="where none">Not sold in stores${prefs.sys !== 'any' ? ' in ' + esc(prefs.sys) : ''} · loot or crafted</span>`;
     const s = l[0].s;
-    return `<span class="where">${esc(s[0])}, ${esc(s[1])} · <span class="num">${fmt(l[0].p)}</span> aUEC${l.length > 1 ? ` <span style="color:var(--muted)">+${l.length - 1} more</span>` : ''}</span>`;
+    return `<span class="where"><span class="wk">Buy</span> ${esc(s[0])}, <b>${esc(s[1])}</b> · ${esc(s[2])} · ${esc(s[3])} · <span class="num">${fmt(l[0].p)}</span> aUEC${l.length > 1 ? ` <span class="more">+${l.length - 1} more</span>` : ''}</span>`;
   }
+
+  // ---------- slot row + part picker (Planner and Fleet) ----------
+  const picker = { scope: null, i: null, sort: null, dir: -1, q: '', buy: false };
+  const mountOf = sl => sl.cat === 'gun' ? (sl.mt === 'Gimbal' ? 'Gimbal' : sl.mt === 'Turret' ? 'Turret' : 'Fixed') : ({ shield: 'Shield', power: 'Power', cooler: 'Cooler', qd: 'QD' })[sl.cat];
+  function slotRow(scope, sl, i, cn, extra) {
+    const it = I[cn];
+    const open = picker.scope === scope && picker.i === i;
+    return `<div class="slot${sl.st !== cn ? ' changed' : ''}${open ? ' open' : ''}" data-slot="${i}">
+      <div class="sz">S${sl.s}<small>${mountOf(sl)}</small></div>
+      <div class="slot-main">
+        <div class="slot-head">
+          <span class="slot-label">${esc(sl.grp)}${sl.crew ? ' · crew turret' : ''}</span>
+          ${!sl.ed ? '<span class="tag t-lock">Locked</span>' : ''}
+          ${extra || ''}
+        </div>
+        <button type="button" class="part" data-pick="${i}" aria-expanded="${open}" ${sl.ed ? '' : 'disabled'} aria-label="${esc(sl.grp)}: ${it ? esc(it.n) : 'empty'}. ${sl.ed ? 'Compare and change part' : 'Locked'}">
+          ${it ? `<span class="part-top">${icon(it.cat)}<span class="pname">${esc(it.n)}${it.s !== sl.s ? ` <small>S${it.s}</small>` : ''}</span><span class="pchips">${chips(it)}</span>${sl.ed ? `<span class="pchange">${open ? 'Close' : 'Compare'}</span>` : ''}</span>
+          <span class="mtrs">${meters(it, CARD_PMETRICS[it.cat])}</span>` : '<span class="part-top"><span class="pname">Empty</span></span>'}
+        </button>
+        ${open ? pickerHTML(scope, sl, i, cn) : ''}
+        ${it ? `<div class="slot-info">${whereText(cn, sl)}</div>` : ''}
+      </div>
+    </div>`;
+  }
+  function pickerRows(sl, cn) {
+    let opts = candidates(sl);
+    if (sl.st && !opts.includes(sl.st)) opts.push(sl.st);
+    const q = picker.q.trim().toLowerCase();
+    if (q) opts = opts.filter(o => (I[o].n + ' ' + I[o].m + ' ' + (I[o].c || '') + ' ' + (I[o].dt || '') + ' ' + (I[o].k || '')).toLowerCase().includes(q));
+    if (picker.buy) opts = opts.filter(o => o === cn || o === sl.st || buyable(o));
+    const ms = PMETRICS[sl.cat];
+    const key = picker.sort || ms[0][0];
+    const m = ms.find(x => x[0] === key);
+    const val = o => key === 'price' ? (cheapest(o) || Infinity) : key === 'name' ? I[o].n : (I[o][key] || 0);
+    opts.sort((a, b) => {
+      const va = val(a), vb = val(b);
+      if (key === 'name') return picker.dir * -1 * String(va).localeCompare(String(vb));
+      const better = key === 'price' ? 'lo' : (m ? m[3] : 'hi');
+      const d = (va - vb) * picker.dir * (better === 'lo' ? -1 : 1);
+      return d || score(b) - score(a);
+    });
+    return opts;
+  }
+  function pickerBody(sl, cn) {
+    const opts = pickerRows(sl, cn);
+    if (!opts.length) return `<tr><td colspan="9" class="pempty">No parts match. Clear the search or turn off “In stores only”.</td></tr>`;
+    const ms = PMETRICS[sl.cat];
+    return opts.map(o => {
+      const it = I[o], l = storesFor(o), cur = o === cn;
+      return `<tr class="${cur ? 'cur' : ''}">
+        <td class="pfit"><button type="button" class="fit" data-fit="${esc(o)}" ${cur ? 'aria-pressed="true"' : ''} aria-label="Fit ${esc(it.n)}">${cur ? 'Fitted' : 'Fit'}</button></td>
+        <th scope="row"><span class="tname">${esc(it.n)}${it.s !== sl.s ? ` <small>S${it.s}</small>` : ''}</span><span class="tsub">${esc(it.m || '')}${o === sl.st ? ' · stock' : ''}</span></th>
+        <td class="tchips">${chips(it)}</td>
+        ${ms.map(m => `<td class="num"><span class="tv">${numTxt(it[m[0]], m[4])}</span><span class="tbar"><i style="width:${meterPct(it, m)}%"></i></span></td>`).join('')}
+        <td class="num tprice">${l.length ? fmt(l[0].p) : '<span class="muted">—</span>'}</td>
+        <td class="twhere">${l.length ? `${esc(l[0].s[1])} <span class="muted">· ${esc(l[0].s[3])}${l.length > 1 ? ` · +${l.length - 1}` : ''}</span>` : '<span class="muted">Loot / crafted</span>'}</td>
+      </tr>`;
+    }).join('');
+  }
+  function pickerHTML(scope, sl, i, cn) {
+    const ms = PMETRICS[sl.cat];
+    const key = picker.sort || ms[0][0];
+    const th = (k, label, cls) => `<th scope="col" class="${cls || ''}"><button type="button" data-psort="${k}" aria-sort="${key === k ? (picker.dir < 0 ? 'descending' : 'ascending') : 'none'}">${label}${key === k ? `<span class="sarr">${picker.dir < 0 ? '▾' : '▴'}</span>` : ''}</button></th>`;
+    const nCand = candidates(sl).length;
+    return `<div class="picker" role="region" aria-label="Compare ${esc(CAT_NAME[sl.cat].toLowerCase())} parts for ${esc(sl.grp)}">
+      <div class="pbar">
+        <label class="sr" for="psearch">Search parts</label>
+        <input id="psearch" data-psearch type="search" placeholder="Search ${nCand} ${sl.cat === 'gun' ? 'weapons' : CAT_NAME[sl.cat].toLowerCase() + 's'}…" value="${esc(picker.q)}" autocomplete="off">
+        <label class="check"><input type="checkbox" data-pbuy ${picker.buy ? 'checked' : ''}> In stores only</label>
+        <span class="phint">Bars compare against every size ${sl.s} part. ${sl.cat === 'gun' && sl.mn < sl.s ? `Fits S${sl.mn}–S${sl.s}.` : ''}</span>
+      </div>
+      <div class="ptable-wrap"><table class="ptable">
+        <thead><tr><th scope="col"><span class="sr">Fit</span></th>${th('name', 'Part', 'tl')}<th scope="col" class="tl">Type</th>${ms.map(m => th(m[0], `${m[1]}${m[2] ? ` <small>${m[2]}</small>` : ''}`, 'num')).join('')}${th('price', 'Price', 'num')}<th scope="col" class="tl">Cheapest at</th></tr></thead>
+        <tbody data-ptbody>${pickerBody(sl, cn)}</tbody>
+      </table></div>
+    </div>`;
+  }
+  // one delegated handler set per container; `scope` decides what a fit does
+  function wirePicker(container, scope, getSlotState, onFit) {
+    container.addEventListener('click', e => {
+      const pb = e.target.closest('[data-pick]');
+      if (pb) {
+        const i = +pb.dataset.pick;
+        if (picker.scope === scope && picker.i === i) { picker.scope = null; picker.i = null; }
+        else Object.assign(picker, { scope, i, sort: null, dir: -1, q: '' });
+        getSlotState().rerender();
+        const again = container.querySelector(`[data-pick="${i}"]`); if (again) again.focus();
+        if (picker.scope === scope) { const pk = container.querySelector('.picker'); if (pk && pk.scrollIntoView) pk.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
+        return;
+      }
+      const sb = e.target.closest('[data-psort]');
+      if (sb) {
+        const k = sb.dataset.psort; const cur = picker.sort || PMETRICS[getSlotState().slot(picker.i).cat][0][0];
+        if (cur === k) picker.dir *= -1; else { picker.sort = k; picker.dir = -1; }
+        getSlotState().rerender();
+        const again = container.querySelector(`[data-psort="${k}"]`); if (again) again.focus();
+        return;
+      }
+      const fb = e.target.closest('[data-fit]');
+      if (fb && picker.scope === scope) {
+        const i = picker.i; picker.scope = null; picker.i = null;
+        onFit(i, fb.dataset.fit);
+        const again = container.querySelector(`[data-pick="${i}"]`); if (again) again.focus();
+      }
+    });
+    container.addEventListener('input', e => {
+      if (!e.target.matches('[data-psearch]') || picker.scope !== scope) return;
+      picker.q = e.target.value;
+      const st = getSlotState(); const tb = container.querySelector('[data-ptbody]');
+      if (tb) tb.innerHTML = pickerBody(st.slot(picker.i), st.current(picker.i));
+    });
+    container.addEventListener('change', e => {
+      if (!e.target.matches('[data-pbuy]') || picker.scope !== scope) return;
+      picker.buy = e.target.checked;
+      const st = getSlotState(); const tb = container.querySelector('[data-ptbody]');
+      if (tb) tb.innerHTML = pickerBody(st.slot(picker.i), st.current(picker.i));
+    });
+    container.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && picker.scope === scope) {
+        const i = picker.i; picker.scope = null; picker.i = null; getSlotState().rerender();
+        const again = container.querySelector(`[data-pick="${i}"]`); if (again) again.focus();
+      }
+    });
+  }
+
   function renderSheet() {
     const el = document.getElementById('sheet');
     let html = '';
     GROUPS.forEach(([key, title, fn]) => {
       const idx = ship.slots.map((s, i) => i).filter(i => fn(ship.slots[i]));
       if (!idx.length) return;
+      const cat = ship.slots[idx[0]].cat;
       let sum = '';
       if (key === 'pilot' || key === 'crew') sum = `${fmt(idx.reduce((a, i) => a + (I[picks[i]] ? I[picks[i]].b : 0), 0))} burst DPS`;
-      html += `<div class="grp"><h2>${title}<span class="num">${idx.length} slot${idx.length > 1 ? 's' : ''}${sum ? ' · ' + sum : ''}</span></h2>`;
+      else if (cat === 'shield') sum = `${fmt(idx.reduce((a, i) => a + (I[picks[i]] ? I[picks[i]].hp : 0), 0))} HP`;
+      else if (cat === 'power' || cat === 'cooler') sum = `${fmt(idx.reduce((a, i) => a + (I[picks[i]] ? I[picks[i]].out : 0), 0))} ${cat === 'power' ? 'power' : 'coolant'}`;
+      else if (cat === 'qd') sum = I[picks[idx[0]]] ? `${fmt(I[picks[idx[0]]].sp)} km/s` : '';
+      html += `<div class="grp"><h2>${icon(cat)}<span>${title}</span><span class="num gsum">${idx.length} slot${idx.length > 1 ? 's' : ''}${sum ? ' · ' + sum : ''}</span></h2>`;
       idx.forEach(i => {
         const sl = ship.slots[i], cn = picks[i];
-        const opts = candidates(sl).sort((a, b) => score(b) - score(a));
-        if (sl.st && !opts.includes(sl.st)) opts.push(sl.st);
-        const changed = sl.st !== cn;
-        const mount = sl.cat === 'gun' ? (sl.mt === 'Gimbal' ? 'Gimbal' : sl.mt === 'Turret' ? 'Turret' : 'Fixed') : ({ shield: 'Shield', power: 'Power', cooler: 'Cooler', qd: 'QD' })[sl.cat];
-        html += `<div class="slot${changed ? ' changed' : ''}">
-          <div class="sz">S${sl.s}<small>${mount}</small></div>
-          <div class="slot-head">
-            <span class="slot-label">${esc(sl.grp)}</span>
-            ${!sl.ed ? '<span class="tag t-lock">Locked</span>' : ''}
-            ${sl.ed && !manual[i] && sl.cat !== 'gun' && prefs.cls !== 'any' && cn && I[cn].c !== prefs.cls ? `<span class="tag t-lock" title="No ${esc(prefs.cls)} part of this size is listed in stores, so the best buyable one is shown">No ${esc(prefs.cls)} for sale</span>` : ''}
-            ${manual[i] ? '<span class="tag t-pin">Your pick</span> <button class="btn-reset" data-reset="' + i + '">Use recommended</button>' : ''}
-            <select id="slot-${i}" data-i="${i}" ${sl.ed ? '' : 'disabled'} aria-label="${esc(sl.grp)} size ${sl.s}">
-              ${opts.map(o => `<option value="${esc(o)}"${o === cn ? ' selected' : ''}>${esc(optLabel(o, sl))}</option>`).join('')}
-              ${!cn ? '<option selected value="">Empty</option>' : ''}
-            </select>
-          </div>
-          <div class="slot-info">${cn ? itemStat(cn) : ''} ${cn ? whereText(cn, sl) : ''}</div>
-        </div>`;
+        const extra = (sl.ed && !manual[i] && sl.cat !== 'gun' && prefs.cls !== 'any' && cn && I[cn].c !== prefs.cls ? `<span class="tag t-lock" title="No ${esc(prefs.cls)} part of this size is listed in stores, so the best buyable one is shown">No ${esc(prefs.cls)} for sale</span>` : '')
+          + (manual[i] ? '<span class="tag t-pin">Your pick</span> <button type="button" class="btn-reset" data-reset="' + i + '">Use recommended</button>' : '');
+        html += slotRow('plan', sl, i, cn, extra);
       });
       html += '</div>';
     });
@@ -738,7 +1044,10 @@ footer.notes a { color: inherit; }
       const d = a[k] ? (b[k] - a[k]) / a[k] * 100 : 0;
       const cls = Math.abs(d) < 0.5 ? '' : d > 0 ? 'up' : 'down';
       const dt = Math.abs(d) < 0.5 ? 'same as stock' : `${d > 0 ? '+' : ''}${d.toFixed(0)}% vs stock ${fmt(a[k])}`;
-      return `<div class="stat"><div class="k">${label}</div><div class="v">${fmt(b[k])}</div><div class="d ${cls}">${dt}</div></div>`;
+      const top = Math.max(a[k], b[k]) || 1;
+      return `<div class="stat"><div class="k">${label}</div><div class="v">${fmt(b[k])}</div>
+        <div class="sbar ${cls}" aria-hidden="true"><i style="width:${(b[k] / top * 100).toFixed(1)}%"></i><b style="left:${(a[k] / top * 100).toFixed(1)}%"></b></div>
+        <div class="d ${cls}">${dt}</div></div>`;
     }).join('');
   }
 
@@ -764,18 +1073,28 @@ footer.notes a { color: inherit; }
     document.getElementById('routesub').textContent = names.length
       ? `${stops.length} stop${stops.length === 1 ? '' : 's'} in ${sysTxt} covers ${sold.length} of ${names.length} new part${names.length === 1 ? '' : 's'}. Prices are each.`
       : 'Your picks match the stock loadout, so there is nothing to buy.';
+    const CAT_ORDER = { gun: 0, shield: 1, power: 2, cooler: 3, qd: 4 };
     document.getElementById('stops').innerHTML = stops.map(s => {
       const st = ST[s.sid];
-      return `<li class="stop"><div class="store">${esc(st[0])}</div>
-        <div class="loc"><b>${esc(st[1])}</b> · ${esc(st[2])} · ${esc(st[3])}</div>
-        ${s.items.map(([cn, p]) => {
-          const alts = storesFor(cn).filter(x => x.sid !== s.sid);
-          return `<div class="buy"><span>${need[cn] > 1 ? need[cn] + '× ' : ''}${esc(I[cn].n)} <span style="color:var(--muted)">S${I[cn].s}</span></span><span class="num">${fmt(p)}</span></div>
-          ${alts.length ? `<details class="alt"><summary>Also at ${alts.length} other store${alts.length > 1 ? 's' : ''}</summary><ul>${alts.slice(0, 30).map(x => `<li>${esc(x.s[0])}, ${esc(x.s[1])} (${esc(x.s[2])}, ${esc(x.s[3])}) · <span class="num">${fmt(x.p)}</span></li>`).join('')}</ul></details>` : ''}`;
+      const items = s.items.slice().sort((x, y) => CAT_ORDER[I[x[0]].cat] - CAT_ORDER[I[y[0]].cat] || y[1] - x[1]);
+      const sub = items.reduce((a, [cn, p]) => a + p * need[cn], 0), cnt = items.reduce((a, [cn]) => a + need[cn], 0);
+      return `<li class="stop">
+        <div class="stop-h"><div><div class="store">${esc(st[0])}</div><div class="loc"><b>${esc(st[1])}</b> · ${esc(st[2])} · <span class="sys sys-${esc(st[3])}">${esc(st[3])}</span></div></div>
+          <div class="stop-sum"><b class="num">${fmt(sub)}</b><span>${cnt} part${cnt > 1 ? 's' : ''}</span></div></div>
+        ${items.map(([cn, p]) => {
+          const it = I[cn], alts = storesFor(cn).filter(x => x.sid !== s.sid);
+          return `<div class="buy">
+            ${icon(it.cat)}
+            <div class="buy-main"><div class="buy-n">${need[cn] > 1 ? `<span class="qty">${need[cn]}×</span>` : ''}${esc(it.n)} <span class="muted">S${it.s} ${esc(CAT_NAME[it.cat].toLowerCase())}</span></div>
+              <div class="buy-c">${chips(it)}<span class="kstat">${esc(keyStat(it))}</span></div>
+              ${alts.length ? `<details class="alt"><summary>Also at ${alts.length} other store${alts.length > 1 ? 's' : ''}</summary><ul>${alts.slice(0, 30).map(x => `<li>${esc(x.s[0])}, ${esc(x.s[1])} (${esc(x.s[2])}, ${esc(x.s[3])}) · <span class="num">${fmt(x.p)}</span></li>`).join('')}</ul></details>` : ''}
+            </div>
+            <span class="num buy-p">${fmt(p)}${need[cn] > 1 ? `<small>each</small>` : ''}</span>
+          </div>`;
         }).join('')}</li>`;
     }).join('');
     document.getElementById('nostock').innerHTML = unsold.length
-      ? `<div class="nostock"><b>No store listing${prefs.sys !== 'any' ? ' in ' + esc(prefs.sys) : ''}:</b> ${unsold.map(cn => esc(I[cn].n)).join(', ')}. These are usually loot, crafted, or ship-stock only. Turn on “Only recommend parts sold in stores” to swap them for buyable picks.</div>`
+      ? `<div class="nostock"><b>Not sold in stores${prefs.sys !== 'any' ? ' in ' + esc(prefs.sys) : ''}:</b><ul>${unsold.map(cn => `<li>${icon(I[cn].cat)}${esc(I[cn].n)} <span class="muted">S${I[cn].s}</span></li>`).join('')}</ul><p>These are usually loot, crafted, or ship-stock only. Turn on “Only recommend parts sold in stores” to swap them for buyable picks.</p></div>`
       : '';
   }
 
@@ -786,16 +1105,21 @@ footer.notes a { color: inherit; }
   }
   function setShip(s, keepManual) {
     ship = s; if (!keepManual) manual = {};
+    if (picker.scope === 'plan') { picker.scope = null; picker.i = null; }
     plannerFleetId = null;
     document.getElementById('ship').value = s.n;
     const guns = s.slots.filter(x => x.cat === 'gun').length;
-    document.getElementById('shipmeta').innerHTML = `<b>${esc(s.m)}</b> · ${esc(s.car)} · ${esc(s.role)} · ${guns} gun hardpoint${guns === 1 ? '' : 's'}`;
+    const qdIt = I[(s.slots.find(x => x.cat === 'qd') || {}).st];
+    document.getElementById('shipmeta').innerHTML = `<div class="metachips">
+      <span class="mchip"><b>${esc(s.m)}</b></span><span class="mchip">${esc(s.role || s.car)}</span><span class="mchip">Size <b>${s.sz}</b></span>
+      <span class="mchip">Crew <b>${s.st.crew}</b></span>${s.st.cargo ? `<span class="mchip"><b>${fmt(s.st.cargo)}</b> SCU</span>` : ''}
+      <span class="mchip"><b>${guns}</b> gun${guns === 1 ? '' : 's'}</span><span class="mchip">SCM <b>${s.st.scm}</b> m/s</span>${qdIt ? `<span class="mchip">QD <b>${fmt(qdIt.sp)}</b> km/s</span>` : ''}</div>`;
     if (view === 'planner') setHash('#' + slug(s.cn));
     recompute();
     renderProfile(); resetThread(); syncSaveBtn();
   }
   function syncControls() {
-    document.querySelectorAll('.seg').forEach(seg => seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(prefs[seg.dataset.key] === b.dataset.v))));
+    document.querySelectorAll('.seg[data-key]').forEach(seg => seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(prefs[seg.dataset.key] === b.dataset.v))));
     document.getElementById('noScatter').checked = prefs.noScatter;
     document.getElementById('buyOnly').checked = prefs.buyOnly;
     if (typeof syncPresets === 'function') syncPresets();
@@ -810,17 +1134,15 @@ footer.notes a { color: inherit; }
   inp.addEventListener('input', () => { const s = byName(inp.value); if (s && s !== ship) setShip(s); });
   inp.addEventListener('focus', () => inp.select());
 
-  document.querySelectorAll('.seg').forEach(seg => seg.addEventListener('click', e => {
+  document.querySelectorAll('.seg[data-key]').forEach(seg => seg.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     prefs[seg.dataset.key] = b.dataset.v; save(); syncControls(); recompute();
   }));
   document.getElementById('noScatter').addEventListener('change', e => { prefs.noScatter = e.target.checked; save(); recompute(); });
   document.getElementById('buyOnly').addEventListener('change', e => { prefs.buyOnly = e.target.checked; save(); recompute(); });
-  document.getElementById('sheet').addEventListener('change', e => {
-    const sel = e.target.closest('select[data-i]'); if (!sel) return;
-    const i = +sel.dataset.i; manual[i] = sel.value; recompute();
-    const again = document.getElementById('slot-' + i); if (again) again.focus();
-  });
+  wirePicker(document.getElementById('sheet'), 'plan',
+    () => ({ rerender: renderSheet, slot: i => ship.slots[i], current: i => picks[i] }),
+    (i, cn) => { manual[i] = cn; recompute(); });
   document.getElementById('sheet').addEventListener('click', e => {
     const b = e.target.closest('[data-reset]'); if (!b) return;
     delete manual[+b.dataset.reset]; recompute();
@@ -1120,6 +1442,51 @@ footer.notes a { color: inherit; }
   const shipChat = makeChat(document.getElementById('chat-ship'), { mode: 'ship', context: q => shipContext(q) });
   const generalChat = makeChat(document.getElementById('chat-general'), { mode: 'general', context: q => generalContext(q), waitText: 'Looking over your fleet…' });
 
+  // ---------- fleet advisor ----------
+  const ACTIVITIES = [
+    ['bounty', 'Bounty hunting', 'NPC bounties & missions', 'gun'],
+    ['pvp', 'PvP dogfighting', 'Fighting other players', 'gun'],
+    ['cargo', 'Cargo hauling', 'Trade runs & deliveries', 'qd'],
+    ['mining', 'Mining', 'Ship or ROC mining', 'power'],
+    ['salvage', 'Salvage', 'Hull scraping & wrecks', 'power'],
+    ['explore', 'Exploration', 'Long trips, Pyro & Nyx', 'qd'],
+    ['rescue', 'Medical & rescue', 'Beacons & evac', 'shield'],
+    ['stealth', 'Stealth & piracy', 'Ambush, interdiction', 'cooler'],
+    ['ground', 'Bunkers & ground ops', 'Drop-offs & FPS support', 'shield'],
+    ['escort', 'Escort & group fights', 'Protecting a convoy', 'shield'],
+    ['racing', 'Racing', 'Speed & handling', 'qd'],
+    ['money', 'Making money fast', 'Best earner I can run', 'power'],
+  ];
+  const CREW = { solo: 'solo, no crew', small: 'with 2–4 friends who can crew turrets or fly escort', org: 'with an org that can crew large ships' };
+  let crew = 'solo';
+  try { crew = localStorage.getItem('hp-crew') || 'solo'; } catch (e) {}
+  const fleetChat = makeChat(document.getElementById('chat-fleet'), {
+    mode: 'fleet', waitText: 'Checking your hangar…',
+    context: q => `Playing ${CREW[crew]}.\n\n` + generalContext(q),
+  });
+  const actsEl = document.getElementById('acts');
+  actsEl.innerHTML = ACTIVITIES.map(([k, n, d, ic]) => `<button type="button" data-act-k="${k}" aria-pressed="false">${icon(ic)}<b>${esc(n)}</b><small>${esc(d)}</small></button>`).join('');
+  actsEl.addEventListener('click', e => {
+    const b = e.target.closest('[data-act-k]'); if (!b || fleetChat.busy()) return;
+    const a = ACTIVITIES.find(x => x[0] === b.dataset.actK);
+    actsEl.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    fleetChat.ask(`${a[1]} (${a[2].toLowerCase()}), playing ${crew === 'solo' ? 'solo' : crew === 'small' ? 'with 2–4 friends' : 'with my org'}: which of my ships is best for it, how should I fit it, and what ship or parts should I get to do it better?`);
+  });
+  const crewSeg = document.getElementById('crewseg');
+  const syncCrew = () => crewSeg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.crew === crew)));
+  crewSeg.addEventListener('click', e => {
+    const b = e.target.closest('[data-crew]'); if (!b) return;
+    crew = b.dataset.crew; try { localStorage.setItem('hp-crew', crew); } catch (err) {}
+    syncCrew();
+  });
+  syncCrew();
+  function syncAdvisor() {
+    const n = fleet.ships.length;
+    document.getElementById('adv-sub').textContent = n
+      ? `Pick an activity. You'll get the best of your ${n} ship${n > 1 ? 's' : ''} for it, how to fit it, and what to get next.`
+      : 'Add your ships below first. Until then, you\'ll get suggestions for which ship to get for each activity.';
+  }
+
   function renderChips() {
     const n = ship.n.replace(MAKERS_RX, '');
     const qs = [`Is the ${n} good for PvP?`, 'What should I upgrade first?', `What's the ${n} best at?`];
@@ -1287,11 +1654,13 @@ footer.notes a { color: inherit; }
         </button></li>`;
       }).join('');
     }
-    renderGeneralChips();
+    renderGeneralChips(); syncAdvisor();
   }
   document.getElementById('flist').addEventListener('click', e => {
     const b = e.target.closest('button[data-f]'); if (!b) return;
-    fleetSel = b.dataset.f; renderFleet();
+    fleetSel = b.dataset.f;
+    if (picker.scope === 'fleet') { picker.scope = null; picker.i = null; }
+    renderFleet();
   });
 
   function dial(k, v, unit, d) { return `<div class="dial"><div class="k">${k}</div><div class="v">${v}${unit ? `<small>${unit}</small>` : ''}</div>${d ? `<div class="d ${d.c || ''}">${d.t}</div>` : '<div class="d">&nbsp;</div>'}</div>`; }
@@ -1342,22 +1711,10 @@ footer.notes a { color: inherit; }
         <div>Spool-up <b>${t.spool}</b> s</div><div>Cooldown <b>${t.qcd}</b> s</div>
         <div>10 Gm ≈ <b>${durTxt(t.spool + 1e7 / t.qd)}</b></div><div>50 Gm ≈ <b>${durTxt(t.spool + 5e7 / t.qd)}</b></div>
       </div><p class="gsub">Travel times are spool-up plus cruising at top speed; real jumps add a few seconds to accelerate.</p>` : '<p class="gsub">No quantum drive.</p>';
-    const slots = s.slots.map((sl, i) => {
-      const cn = list[i];
-      const opts = candidates(sl).sort((x, y) => score(y) - score(x));
-      if (sl.st && !opts.includes(sl.st)) opts.push(sl.st);
-      const mount = sl.cat === 'gun' ? (sl.mt === 'Gimbal' ? 'Gimbal' : sl.mt === 'Turret' ? 'Turret' : 'Fixed') : ({ shield: 'Shield', power: 'Power', cooler: 'Cooler', qd: 'QD' })[sl.cat];
-      return `<div class="fslot${cn !== sl.st ? ' changed' : ''}">
-        <div class="sz">S${sl.s}<small>${mount}</small></div>
-        <div style="min-width:0">
-          <span class="slot-label">${esc(sl.grp)}${sl.crew ? ' · crew turret' : ''}${!sl.ed ? ' · locked' : ''}</span>
-          <select data-fs="${i}" ${sl.ed ? '' : 'disabled'} aria-label="${esc(sl.grp)} size ${sl.s}">
-            ${opts.map(o => `<option value="${esc(o)}"${o === cn ? ' selected' : ''}>${esc(optLabel(o, sl))}</option>`).join('')}
-            ${!cn ? '<option selected value="">Empty</option>' : ''}
-          </select>
-          <div class="slot-info">${cn ? itemStat(cn) : ''}</div>
-        </div>
-      </div>`;
+    const slots = GROUPS.map(([key, title, fn]) => {
+      const idx = s.slots.map((x, i) => i).filter(i => fn(s.slots[i]));
+      if (!idx.length) return '';
+      return `<div class="grp"><h2>${icon(s.slots[idx[0]].cat)}<span>${title}</span><span class="num gsum">${idx.length} slot${idx.length > 1 ? 's' : ''}</span></h2>${idx.map(i => slotRow('fleet', s.slots[i], i, list[i], '')).join('')}</div>`;
     }).join('');
     const changed = Object.keys(f.picks || {}).length;
     el.innerHTML = `
@@ -1383,7 +1740,7 @@ footer.notes a { color: inherit; }
           ${Object.keys(PRESETS).map(k => `<button class="btn ghost" type="button" data-fill="${k}">${esc(PRESETS[k].name)}</button>`).join('')}
           <button class="btn ghost" type="button" data-fill="stock">Stock</button>
         </div>
-        <div class="fslots">${slots}</div>
+        <div class="fslots sheet">${slots}</div>
       </div>`;
   }
 
@@ -1408,12 +1765,14 @@ footer.notes a { color: inherit; }
       if (JSON.stringify([f.name, f.livery, f.notes]) !== before) { saveFleet(); setTimeout(renderHangar, 250); }
       return;
     }
-    const sel = e.target.closest('select[data-fs]'); if (!sel) return;
-    const i = +sel.dataset.fs, s = byCn[f.cn];
-    if (sel.value && sel.value !== s.slots[i].st) f.picks[i] = sel.value; else delete f.picks[i];
-    saveFleet(); renderFleet();
-    const again = document.querySelector(`select[data-fs="${i}"]`); if (again) again.focus();
   });
+  wirePicker(fdetail, 'fleet',
+    () => { const f = fleet.ships.find(x => x.id === fleetSel); const s = byCn[f.cn]; const list = fleetPicks(f); return { rerender: renderFleetDetail, slot: i => s.slots[i], current: i => list[i] }; },
+    (i, cn) => {
+      const f = fleet.ships.find(x => x.id === fleetSel); if (!f) return;
+      if (cn && cn !== byCn[f.cn].slots[i].st) f.picks[i] = cn; else delete f.picks[i];
+      saveFleet(); renderFleet();
+    });
   fdetail.addEventListener('click', e => {
     const f = fleet.ships.find(x => x.id === fleetSel); if (!f) return;
     const s = byCn[f.cn];
@@ -1441,8 +1800,9 @@ footer.notes a { color: inherit; }
       plannerFleetId = f.id; recompute(); syncSaveBtn();
       document.getElementById('savemsg').textContent = `Showing your ${fleetLabel(f)}. Changes here aren't saved until you tap Update.`;
     } else if (act.dataset.act === 'ask') {
-      showView('ask');
-      generalChat.prefill(`What's my ${fleetLabel(f)} best for with its current parts, and what should I upgrade?`);
+      const adv = document.getElementById('chat-fleet');
+      if (adv.scrollIntoView) adv.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      fleetChat.prefill(`What's my ${fleetLabel(f)} best for with its current parts, and what should I upgrade?`);
     }
   });
 
